@@ -1,0 +1,39 @@
+[package]
+name    = "stm32f103c8t6-project"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name  = "stm32f103c8t6-project"
+test  = false
+bench = false
+
+[dependencies]
+cortex-m    = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7.0"
+panic-halt  = "1.0"
+
+stm32f1xx-hal = { version = "0.10", features = ["stm32f103", "medium", "rt"] }
+nb = "1.1.0"
+
+#I2C display GME64128-11 64×128
+embedded-graphics = "0.8.2"
+ssd1306 = "0.8.4"
+heapless = "0.8.0" #transform u32 -> &str
+
+libm = "0.2" #for mw_mmwave radar gates data convert
+
+# Flash with:  cargo flash --chip STM32F103C8 --release
+# Debug with:  cargo run   --release   (requires probe-rs in PATH)
+
+[profile.release]
+panic         = "abort"
+codegen-units = 1
+debug         = true
+lto           = true
+opt-level     = "s"
+
+[profile.dev]
+panic     = "abort"
+opt-level = 1
+

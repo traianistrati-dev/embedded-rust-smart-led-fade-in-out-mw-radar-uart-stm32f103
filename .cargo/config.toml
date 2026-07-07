@@ -1,0 +1,9 @@
+[build]
+target = "thumbv7m-none-eabi"
+
+[target.thumbv7m-none-eabi]
+# Requires probe-rs: https://probe.rs/docs/getting-started/installation/
+runner    = "probe-rs run --chip STM32F103C8"
+rustflags = [
+"-C", "link-arg=-Tlink.x",
+]
