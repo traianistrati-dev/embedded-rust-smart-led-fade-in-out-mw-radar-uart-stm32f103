@@ -9,7 +9,7 @@ type UsartRxType = stm32f1xx_hal::serial::Rx<pac::USART1>;
 
 
 
-pub fn decode_sensor_value(value: u32) -> f32 {
+pub fn decode_threschold_value(value: u32) -> f32 {
     if value == 0 {
         return 0.0;
     }
@@ -77,9 +77,9 @@ fn send_cmd<const S:usize, const R:usize>(
         nb::block!(tx.write(b)).ok();
     }
 
+    delay_ms(data.wait_ms);
+
     if !data.result.is_empty() {
-        // cortex_m::asm::delay(data.wait_ms);
-        delay_ms(data.wait_ms);
         let mut result_index = 0;
         loop{
 
@@ -118,11 +118,6 @@ fn send_cmd_with_result<const S:usize, const R:usize,const PAYLOAD_LEN: usize, c
     for &b in &data.send {
         nb::block!(tx.write(b)).ok();
     }
-
-
-    // cortex_m::asm::delay(data.wait_ms);
-
-    //let mut delay = cp.SYST.delay(&clocks);
 
     delay_ms(data.wait_ms);
 

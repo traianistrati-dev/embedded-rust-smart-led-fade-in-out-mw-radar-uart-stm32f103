@@ -45,7 +45,7 @@ impl SerialCmd<18,14>{
                 0x00, 0x00,
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
-            wait_ms: 100,
+            wait_ms: 50,
 
         }
 
@@ -72,7 +72,7 @@ impl SerialCmd<14,0>{
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
             result: [],
-            wait_ms: 100,
+            wait_ms: 1,
         }
 
     }
@@ -102,7 +102,7 @@ impl SerialCmd<14,18>{
                 0x00, 0x00, 0x00, 0x00,
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
-            wait_ms: 100,
+            wait_ms: 50,
         }
     }
 }
@@ -132,7 +132,7 @@ impl SerialCmd<12,14>{
                 0x00, 0x00,
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
-            wait_ms: 100,
+            wait_ms: 50,
         }
     }
 
@@ -163,7 +163,7 @@ impl SerialCmd<18,0>{
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
             result: [],
-            wait_ms: 100,
+            wait_ms: 50,
         }
     }
 

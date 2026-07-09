@@ -53,7 +53,7 @@ fn main() -> ! {
 
     // <<< GENERATED END >>>
 
-    let delay_ms = |ms:u32|{
+    let delay_ms = &|ms:u32|{
         cortex_m::asm::delay(ms.saturating_mul(&clocks.sysclk().to_Hz() / 1_000));
     };
 
@@ -77,44 +77,38 @@ fn main() -> ! {
     let mut parser_params = mw_radar::read_param::ReadParam::new_parser();
     //----------------------
 
-    // begin_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar);
+    begin_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar,delay_ms);
+    {
+        let radar_range_gate_val:Option<u32> = mw_radar::utils::get_param_value(
+            &mut _tx1_mw_radar,&mut _rx1_mw_radar
+            ,mw_radar::data::ParameterID::Range
+            ,&mut parser_params
+            ,delay_ms
+        );
 
-    let radar_range_gate_val:Option<u32> = mw_radar::utils::get_param_value(
-        &mut _tx1_mw_radar,&mut _rx1_mw_radar
-        ,mw_radar::data::ParameterID::Range
-        ,&mut parser_params
-        ,&delay_ms
-    );
-
-    if let Some(value) = radar_range_gate_val{
 
         let mut out = [0u8; 32];
 
         pins::utils::i2c1::wtrite_to_display(&mut display
-            ,format_text_with_u32("Range: ",value, "", &mut out)
+            ,format_text_with_u32("Range: ",radar_range_gate_val.unwrap_or_default(), "", &mut out)
             ,0);
-        //display.flush().unwrap();
-
     }
     //----------------------
-    let radar_delay_gate_val:Option<u32> = mw_radar::utils::get_param_value(
-        &mut _tx1_mw_radar,&mut _rx1_mw_radar
-        ,mw_radar::data::ParameterID::Delay
-        ,&mut parser_params
-        ,&delay_ms
-    );
-
-    if let Some(value) = radar_delay_gate_val{
+    {
+        let radar_delay_gate_val:Option<u32> = mw_radar::utils::get_param_value(
+            &mut _tx1_mw_radar,&mut _rx1_mw_radar
+            ,mw_radar::data::ParameterID::Delay
+            ,&mut parser_params
+            ,delay_ms
+        );
 
         let mut out = [0u8; 32];
 
         pins::utils::i2c1::wtrite_to_display(&mut display
-            ,format_text_with_u32("Delay: ",value, " sec", &mut out)
+            ,format_text_with_u32("Delay: ",radar_delay_gate_val.unwrap_or_default(), " sec", &mut out)
             ,11);
-
-        // display.flush().unwrap();
-
     }
+
 
 
     // pins::utils::i2c1::wtrite_to_display(&mut display
@@ -125,34 +119,39 @@ fn main() -> ! {
     // ,22);
 
     //----------------------
-    let radar_tt_00_val:Option<u32> = mw_radar::utils::get_param_value(
-        &mut _tx1_mw_radar,&mut _rx1_mw_radar
-        ,mw_radar::data::ParameterID::TriggerThreshold00
-        ,&mut parser_params
-        ,&delay_ms
-    );
+    {
+        let radar_tt_00_val:Option<u32> = mw_radar::utils::get_param_value(
+            &mut _tx1_mw_radar,&mut _rx1_mw_radar
+            ,mw_radar::data::ParameterID::TriggerThreshold00
+            ,&mut parser_params
+            ,delay_ms
+        );
 
-    let radar_ht_00_val:Option<u32> = mw_radar::utils::get_param_value(
-        &mut _tx1_mw_radar,&mut _rx1_mw_radar
-        ,mw_radar::data::ParameterID::HoldThreshold00
-        ,&mut parser_params
-        ,&delay_ms
-    );
+        let radar_ht_00_val:Option<u32> = mw_radar::utils::get_param_value(
+            &mut _tx1_mw_radar,&mut _rx1_mw_radar
+            ,mw_radar::data::ParameterID::HoldThreshold00
+            ,&mut parser_params
+            ,delay_ms
+        );
 
-    let mut out = [0u8; 32];
 
-    pins::utils::i2c1::wtrite_to_display(&mut display
-        ,format_text_with_u32_2inline(
-            "00 tt=",decode_sensor_value(radar_tt_00_val.unwrap_or_default())
-            ," ht=",decode_sensor_value(radar_ht_00_val.unwrap_or_default())
-            , &mut out)
-        ,22);
+        let mut out = [0u8; 32];
+
+        pins::utils::i2c1::wtrite_to_display(&mut display
+            ,format_text_with_u32_2inline(
+                "00 tt=",decode_threschold_value(radar_tt_00_val.unwrap_or_default())
+                ," ht=",decode_threschold_value(radar_ht_00_val.unwrap_or_default())
+                , &mut out)
+            ,22);
+    }
 
     display.flush().unwrap();
 
-    // end_save_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar);
 
-    delay_ms(5000);
+    delay_ms(10000);
+
+    end_save_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar,delay_ms);
+
     // cortex_m::asm::delay(999_999_999);//72MHz
     // ── Loop principal ────────────────────────────────────────────────────────
 
@@ -162,7 +161,7 @@ fn main() -> ! {
 
 
 
-    send_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar, radar_range_gate as f32 , radar_delay_sec as f32, 48.93,&delay_ms);
+    send_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar, radar_range_gate as f32 , radar_delay_sec as f32, 48.93,delay_ms);
 
 
 
