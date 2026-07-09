@@ -1,16 +1,15 @@
-use stm32f1xx_hal::{
-    pac,
-};
+use stm32f1xx_hal::pac;
+
+use super::{ParameterID, SerialCmd, ParserResult};
 
 
 type UsartTxType = stm32f1xx_hal::serial::Tx<pac::USART1>;
 type UsartRxType = stm32f1xx_hal::serial::Rx<pac::USART1>;
 
 
-use super::{ParameterID, SerialCmd, ParserResult};
 
 
-pub fn decode(value: u32) -> f32 {
+pub fn decode_sensor_value(value: u32) -> f32 {
     if value == 0 {
         return 0.0;
     }
@@ -20,30 +19,30 @@ pub fn decode(value: u32) -> f32 {
 
 
 
-pub fn send_config(tx: &mut UsartTxType,rx: &mut UsartRxType, max_range:f32, delay_sec:f32, trigger_treschold_00:f32){
+pub fn send_config(tx: &mut UsartTxType,rx: &mut UsartRxType, max_range:f32, delay_sec:f32, trigger_treschold_00:f32,delay_ms:&impl Fn(u32)){
 
 
-    begin_config(tx,rx);
-    begin_config(tx,rx);
+    begin_config(tx,rx,delay_ms);
+    begin_config(tx,rx,delay_ms);
 
-    send_cmd(tx,rx,SerialCmd::new_set_param(ParameterID::Range, max_range));
-    send_cmd(tx,rx,SerialCmd::new_set_param(ParameterID::Delay, delay_sec));
-    send_cmd(tx,rx,SerialCmd::new_set_param(ParameterID::TriggerThreshold00, trigger_treschold_00));
+    send_cmd(tx,rx,SerialCmd::new_set_param(ParameterID::Range, max_range),delay_ms);
+    send_cmd(tx,rx,SerialCmd::new_set_param(ParameterID::Delay, delay_sec),delay_ms);
+    send_cmd(tx,rx,SerialCmd::new_set_param(ParameterID::TriggerThreshold00, trigger_treschold_00),delay_ms);
 
 
-    send_cmd(tx,rx,SerialCmd::new_set_report_mode());
+    send_cmd(tx,rx,SerialCmd::new_set_report_mode(),delay_ms);
 
-    end_save_config(tx,rx);
+    end_save_config(tx,rx,delay_ms);
 
 
 }
 
-pub fn begin_config(tx: &mut UsartTxType,rx: &mut UsartRxType){
-    send_cmd(tx,rx,SerialCmd::new_begin_config());
+pub fn begin_config(tx: &mut UsartTxType,rx: &mut UsartRxType,delay_ms:&impl Fn(u32)){
+    send_cmd(tx,rx,SerialCmd::new_begin_config(),delay_ms);
 }
 
-pub fn end_save_config(tx: &mut UsartTxType,rx: &mut UsartRxType){
-    send_cmd(tx,rx,SerialCmd::new_end_save_config());
+pub fn end_save_config(tx: &mut UsartTxType,rx: &mut UsartRxType,delay_ms:&impl Fn(u32)){
+    send_cmd(tx,rx,SerialCmd::new_end_save_config(),delay_ms);
 }
 
 
@@ -52,18 +51,17 @@ pub fn get_param_value<const PAYLOAD_LEN: usize, const RESERVED_LEN: usize, cons
     ,rx: &mut UsartRxType
     ,param_id:ParameterID
     ,parser:&mut super::Parser<PAYLOAD_LEN,RESERVED_LEN,EXPECTED_CMD_ID>
+    ,delay_ms:&impl Fn(u32)
 ) -> Option<u32>{
 
     //  send_cmd(tx,rx,SerialCmd::new_begin_config());
 
-    let result_value = send_cmd_with_result(tx,rx
+    send_cmd_with_result(tx,rx
         ,SerialCmd::send_read_param_value(param_id)
         ,parser
-        , super::read_param::ReadParam::decode);
-
-    // send_cmd(tx,rx,SerialCmd::new_end_save_config());
-
-    result_value
+        , super::read_param::ReadParam::decode
+        , delay_ms
+    )
 
 }
 
@@ -71,7 +69,8 @@ pub fn get_param_value<const PAYLOAD_LEN: usize, const RESERVED_LEN: usize, cons
 fn send_cmd<const S:usize, const R:usize>(
     tx:   &mut UsartTxType,
     rx:   &mut UsartRxType,
-    data:SerialCmd<S,R>
+    data:SerialCmd<S,R>,
+    delay_ms:&impl Fn(u32)
 
 ) {
     for &b in &data.send {
@@ -79,7 +78,8 @@ fn send_cmd<const S:usize, const R:usize>(
     }
 
     if !data.result.is_empty() {
-        cortex_m::asm::delay(data.wait);
+        // cortex_m::asm::delay(data.wait_ms);
+        delay_ms(data.wait_ms);
         let mut result_index = 0;
         loop{
 
@@ -110,7 +110,8 @@ fn send_cmd_with_result<const S:usize, const R:usize,const PAYLOAD_LEN: usize, c
     rx:   &mut UsartRxType,
     data:SerialCmd<S,R>,
     parser:&mut super::Parser<PAYLOAD_LEN,RESERVED_LEN,EXPECTED_CMD_ID>,
-    decoder: fn(&[u8]) -> RESULT
+    decoder: fn(&[u8]) -> RESULT,
+    delay_ms:&impl Fn(u32)
 
 ) -> Option<RESULT>
 {
@@ -119,8 +120,11 @@ fn send_cmd_with_result<const S:usize, const R:usize,const PAYLOAD_LEN: usize, c
     }
 
 
-    cortex_m::asm::delay(data.wait);
+    // cortex_m::asm::delay(data.wait_ms);
 
+    //let mut delay = cp.SYST.delay(&clocks);
+
+    delay_ms(data.wait_ms);
 
     parser.clear();
 

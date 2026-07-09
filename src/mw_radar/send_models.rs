@@ -5,7 +5,7 @@ pub struct SerialCmd<const S:usize,const R:usize>{
 
     pub send: [u8;S],
     pub result: [u8;R],
-    pub wait: u32,
+    pub wait_ms: u32,
 
 }
 ///
@@ -23,7 +23,7 @@ impl SerialCmd<18,14>{
 
             ParameterID::Range => (param_value as u32).to_le_bytes(),
             ParameterID::Delay => (param_value as u32).to_le_bytes(),
-            _ => encode(param_value),
+            _ => encode_threshold_value_to_le_bytes(param_value),
         };
 
         let param_id_2b = param_id.get_bytes();
@@ -45,7 +45,7 @@ impl SerialCmd<18,14>{
                 0x00, 0x00,
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
-            wait: 1000,
+            wait_ms: 100,
 
         }
 
@@ -72,7 +72,7 @@ impl SerialCmd<14,0>{
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
             result: [],
-            wait: 10000,
+            wait_ms: 100,
         }
 
     }
@@ -102,7 +102,7 @@ impl SerialCmd<14,18>{
                 0x00, 0x00, 0x00, 0x00,
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
-            wait: 1000,
+            wait_ms: 100,
         }
     }
 }
@@ -132,7 +132,7 @@ impl SerialCmd<12,14>{
                 0x00, 0x00,
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
-            wait: 1000,
+            wait_ms: 100,
         }
     }
 
@@ -163,7 +163,7 @@ impl SerialCmd<18,0>{
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
             result: [],
-            wait: 1000,
+            wait_ms: 100,
         }
     }
 
@@ -174,7 +174,7 @@ impl SerialCmd<18,0>{
 
 
 
-pub fn encode(value: f32) -> [u8;4] {
+pub fn encode_threshold_value_to_le_bytes(value: f32) -> [u8;4] {
     if value == 0.0 {
         return [0x00,0x00,0x00,0x00];
     }

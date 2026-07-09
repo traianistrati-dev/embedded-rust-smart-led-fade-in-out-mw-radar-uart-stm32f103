@@ -19,9 +19,6 @@ impl ParserResult<PAYLOAD_LEN, RESERVED_LEN,EXPECTED_CMD_ID, u32> for ReadParam 
         ParserType::new(CMD_HEADER, CMD_TAIL)
     }
 
-    // fn payload(parser:&ParserType) -> [u8; PAYLOAD_LEN]{
-    // parser.payload
-    // }
 
     fn decode(payload:&[u8]) -> u32{
         // u32::from_le_bytes([payload[0],payload[1],payload[2],payload[3]])

@@ -75,9 +75,6 @@ impl CommandID{
     pub fn get_bytes(self) -> [u8;2]{
         (self as u16).to_be_bytes()
     }
-    pub fn get_byte_0(self) -> u8{
-        (self as u16).to_be_bytes()[0]
-    }
 
     pub const fn raw(self) -> u16 {
         self as u16
