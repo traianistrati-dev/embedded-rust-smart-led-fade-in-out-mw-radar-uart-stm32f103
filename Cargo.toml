@@ -16,6 +16,7 @@ panic-halt  = "1.0"
 stm32f1xx-hal = { version = "0.10", features = ["stm32f103", "medium", "rt"] }
 nb = "1.1.0"
 
+
 #I2C display GME64128-11 64×128
 embedded-graphics = "0.8.2"
 ssd1306 = "0.8.4"

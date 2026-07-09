@@ -87,151 +87,151 @@ pub fn wtrite_to_display_font10x20<PINS>(
 
 
 
-pub fn write_128x32_text<PINS>( display: &mut Ssd1306<
-    I2CInterface<BlockingI2c<I2C1, PINS>>,
-    DisplaySize128x32,
-    BufferedGraphicsMode<DisplaySize128x32>,
-    >, text: &str) {
+// pub fn write_128x32_text<PINS>( display: &mut Ssd1306<
+    // I2CInterface<BlockingI2c<I2C1, PINS>>,
+    // DisplaySize128x32,
+    // BufferedGraphicsMode<DisplaySize128x32>,
+    // >, text: &str) {
 
 
-    wtrite_to_display(display, text, 16);
+    // wtrite_to_display(display, text, 16);
 
-}
-pub fn write_128x32_text_2lines<PINS>(  display: &mut Ssd1306<
-    I2CInterface<BlockingI2c<I2C1, PINS>>,
-    DisplaySize128x32,
-    BufferedGraphicsMode<DisplaySize128x32>,
-    >, text_line1: &str, text_line2: &str) {
+// }
+// pub fn write_128x32_text_2lines<PINS>(  display: &mut Ssd1306<
+    // I2CInterface<BlockingI2c<I2C1, PINS>>,
+    // DisplaySize128x32,
+    // BufferedGraphicsMode<DisplaySize128x32>,
+    // >, text_line1: &str, text_line2: &str) {
 
 
-    wtrite_to_display(display, text_line1, 10);
-    wtrite_to_display(display, text_line2, 24);
+    // wtrite_to_display(display, text_line1, 10);
+    // wtrite_to_display(display, text_line2, 24);
 
-}
+// }
 
-pub fn write_128x32_hello_world<PINS>(
-    i2c: stm32f1xx_hal::i2c::BlockingI2c<stm32f1xx_hal::pac::I2C1, PINS>,
-) {
-    let interface = I2CDisplayInterface::new(i2c);
+// pub fn write_128x32_hello_world<PINS>(
+    // i2c: stm32f1xx_hal::i2c::BlockingI2c<stm32f1xx_hal::pac::I2C1, PINS>,
+// ) {
+    // let interface = I2CDisplayInterface::new(i2c);
 
-    let mut display = Ssd1306::new(
-        interface,
-        DisplaySize128x32,
-        //DisplaySize128x64,
-        DisplayRotation::Rotate0,
-    )
-    .into_buffered_graphics_mode();
+    // let mut display = Ssd1306::new(
+        // interface,
+        // DisplaySize128x32,
+        // //DisplaySize128x64,
+        // DisplayRotation::Rotate0,
+    // )
+    // .into_buffered_graphics_mode();
 
-    display.init().unwrap();
+    // display.init().unwrap();
 
-    display.clear(BinaryColor::Off).unwrap();
-    /**/
-    let style = MonoTextStyle::new(&FONT_10X20, BinaryColor::On);
+    // display.clear(BinaryColor::Off).unwrap();
+    // /**/
+    // let style = MonoTextStyle::new(&FONT_10X20, BinaryColor::On);
 
-    Text::new("Hello World!", Point::new(0, 16), style)
-    .draw(&mut display)
-    .unwrap();
-    /**/
+    // Text::new("Hello World!", Point::new(0, 16), style)
+    // .draw(&mut display)
+    // .unwrap();
+    // /**/
 
-    display.flush().unwrap();
-}
+    // display.flush().unwrap();
+// }
 
-pub fn write_128x64_hello_world<PINS>(
-    i2c: stm32f1xx_hal::i2c::BlockingI2c<stm32f1xx_hal::pac::I2C1, PINS>,
-) {
-    let interface = I2CDisplayInterface::new(i2c);
+// pub fn write_128x64_hello_world<PINS>(
+    // i2c: stm32f1xx_hal::i2c::BlockingI2c<stm32f1xx_hal::pac::I2C1, PINS>,
+// ) {
+    // let interface = I2CDisplayInterface::new(i2c);
 
-    let mut display = Ssd1306::new(
-        interface,
-        //DisplaySize128x32,
-        DisplaySize128x64,
-        DisplayRotation::Rotate0,
-    )
-    .into_buffered_graphics_mode();
+    // let mut display = Ssd1306::new(
+        // interface,
+        // //DisplaySize128x32,
+        // DisplaySize128x64,
+        // DisplayRotation::Rotate0,
+    // )
+    // .into_buffered_graphics_mode();
 
-    display.init().unwrap();
+    // display.init().unwrap();
 
-    display.clear(BinaryColor::Off).unwrap();
-    /**/
-    let style = MonoTextStyle::new(&FONT_6X10, BinaryColor::On);
+    // display.clear(BinaryColor::Off).unwrap();
+    // /**/
+    // let style = MonoTextStyle::new(&FONT_6X10, BinaryColor::On);
 
-    Text::new("Hello World!", Point::new(0, 16), style)
-    .draw(&mut display)
-    .unwrap();
-    /**/
-    /*
-    for _ in 0..100000 {
-        cortex_m::asm::nop();
-    }
-    */
-    /*
-    for y in 0..64 {
-        for x in 0..128 {
-            if (x / 8) % 2 == 0 {
-                Pixel(
-                    Point::new(x, y),
-                    BinaryColor::On,
-                )
-                .draw(&mut display)
-                .unwrap();
-            }
-        }
-    }
-    */
+    // Text::new("Hello World!", Point::new(0, 16), style)
+    // .draw(&mut display)
+    // .unwrap();
+    // /**/
+    // /*
+    // for _ in 0..100000 {
+        // cortex_m::asm::nop();
+    // }
+    // */
+    // /*
+    // for y in 0..64 {
+        // for x in 0..128 {
+            // if (x / 8) % 2 == 0 {
+                // Pixel(
+                    // Point::new(x, y),
+                    // BinaryColor::On,
+                // )
+                // .draw(&mut display)
+                // .unwrap();
+            // }
+        // }
+    // }
+    // */
 
-    display.flush().unwrap();
-}
+    // display.flush().unwrap();
+// }
 
-pub fn write_128x64_rectangle<PINS>(
-    i2c: stm32f1xx_hal::i2c::BlockingI2c<stm32f1xx_hal::pac::I2C1, PINS>,
-) {
-    let interface = I2CDisplayInterface::new(i2c);
+// pub fn write_128x64_rectangle<PINS>(
+    // i2c: stm32f1xx_hal::i2c::BlockingI2c<stm32f1xx_hal::pac::I2C1, PINS>,
+// ) {
+    // let interface = I2CDisplayInterface::new(i2c);
 
-    let mut display = Ssd1306::new(
-        interface,
-        //DisplaySize128x32,
-        DisplaySize128x64,
-        DisplayRotation::Rotate0,
-    )
-    .into_buffered_graphics_mode();
+    // let mut display = Ssd1306::new(
+        // interface,
+        // //DisplaySize128x32,
+        // DisplaySize128x64,
+        // DisplayRotation::Rotate0,
+    // )
+    // .into_buffered_graphics_mode();
 
-    display.init().unwrap();
+    // display.init().unwrap();
 
-    display.clear(BinaryColor::Off).unwrap();
+    // display.clear(BinaryColor::Off).unwrap();
 
-    embedded_graphics::primitives::Rectangle::new(Point::new(0, 0), Size::new(20, 20))
-    .into_styled(embedded_graphics::primitives::PrimitiveStyle::with_fill(
-            BinaryColor::On,
-    ))
-    .draw(&mut display)
-    .unwrap();
+    // embedded_graphics::primitives::Rectangle::new(Point::new(0, 0), Size::new(20, 20))
+    // .into_styled(embedded_graphics::primitives::PrimitiveStyle::with_fill(
+            // BinaryColor::On,
+    // ))
+    // .draw(&mut display)
+    // .unwrap();
 
-    display.flush().unwrap();
-}
+    // display.flush().unwrap();
+// }
 
-pub fn write_128x32_rectangle<PINS>(
-    i2c: stm32f1xx_hal::i2c::BlockingI2c<stm32f1xx_hal::pac::I2C1, PINS>,
-) {
-    let interface = I2CDisplayInterface::new(i2c);
+// pub fn write_128x32_rectangle<PINS>(
+    // i2c: stm32f1xx_hal::i2c::BlockingI2c<stm32f1xx_hal::pac::I2C1, PINS>,
+// ) {
+    // let interface = I2CDisplayInterface::new(i2c);
 
-    let mut display = Ssd1306::new(
-        interface,
-        DisplaySize128x32,
-        //DisplaySize128x64,
-        DisplayRotation::Rotate0,
-    )
-    .into_buffered_graphics_mode();
+    // let mut display = Ssd1306::new(
+        // interface,
+        // DisplaySize128x32,
+        // //DisplaySize128x64,
+        // DisplayRotation::Rotate0,
+    // )
+    // .into_buffered_graphics_mode();
 
-    display.init().unwrap();
+    // display.init().unwrap();
 
-    display.clear(BinaryColor::Off).unwrap();
+    // display.clear(BinaryColor::Off).unwrap();
 
-    embedded_graphics::primitives::Rectangle::new(Point::new(0, 0), Size::new(20, 20))
-    .into_styled(embedded_graphics::primitives::PrimitiveStyle::with_fill(
-            BinaryColor::On,
-    ))
-    .draw(&mut display)
-    .unwrap();
+    // embedded_graphics::primitives::Rectangle::new(Point::new(0, 0), Size::new(20, 20))
+    // .into_styled(embedded_graphics::primitives::PrimitiveStyle::with_fill(
+            // BinaryColor::On,
+    // ))
+    // .draw(&mut display)
+    // .unwrap();
 
-    display.flush().unwrap();
-}
+    // display.flush().unwrap();
+// }

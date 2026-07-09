@@ -21,15 +21,15 @@ use stm32f1xx_hal::{
 
 #[entry]
 fn main() -> ! {
-    let dp = pac::Peripherals::take().unwrap();
+let dp = pac::Peripherals::take().unwrap();
 
-    let mut flash = dp.FLASH.constrain();
-    let rcc = dp.RCC.constrain();
-    let mut afio = dp.AFIO.constrain();
-    let clocks = rcc.cfgr
-    .sysclk(8.MHz())
-    .pclk1(4.MHz())
-    .freeze(&mut flash.acr);
+let mut flash = dp.FLASH.constrain();
+let rcc = dp.RCC.constrain();
+let mut afio = dp.AFIO.constrain();
+let clocks = rcc.cfgr
+                 .sysclk(8.MHz())
+                 .pclk1(4.MHz())
+                 .freeze(&mut flash.acr);
 
     let mut gpioa = dp.GPIOA.split();
     let mut gpiob = dp.GPIOB.split();
@@ -51,7 +51,7 @@ fn main() -> ! {
     let (mut _tx1_mw_radar, mut _rx1_mw_radar) = pins::configs::usart1::init(dp.USART1, (pa9_usart1_tx, pa10_usart1_rx), &mut afio, &clocks);
     let _i2c1_128x32_display = pins::configs::i2c1::init(dp.I2C1, (pb8_i2c1_scl, pb9_i2c1_sda), &mut afio, &clocks);
 
-    // <<< GENERATED END >>>
+// <<< GENERATED END >>>
 
     let delay_ms = &|ms:u32|{
         cortex_m::asm::delay(ms.saturating_mul(&clocks.sysclk().to_Hz() / 1_000));
@@ -87,7 +87,7 @@ fn main() -> ! {
         );
 
 
-        let mut out = [0u8; 32];
+        let mut out = [0u8; 32]; 
 
         pins::utils::i2c1::wtrite_to_display(&mut display
             ,format_text_with_u32("Range: ",radar_range_gate_val.unwrap_or_default(), "", &mut out)
