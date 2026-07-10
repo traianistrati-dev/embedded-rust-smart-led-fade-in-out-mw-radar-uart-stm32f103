@@ -9,7 +9,6 @@ use cortex_m_rt::entry;
 use panic_halt as _;
 
 mod mw_radar;
-use mw_radar::utils::*;
 use mw_radar::read::ParserResult;
 
 
@@ -27,8 +26,9 @@ let mut flash = dp.FLASH.constrain();
 let rcc = dp.RCC.constrain();
 let mut afio = dp.AFIO.constrain();
 let clocks = rcc.cfgr
-                 .sysclk(8.MHz())
-                 .pclk1(4.MHz())
+                 .use_hse(8.MHz())
+                 .sysclk(72.MHz())
+                 .pclk1(36.MHz())
                  .freeze(&mut flash.acr);
 
     let mut gpioa = dp.GPIOA.split();
@@ -53,8 +53,8 @@ let clocks = rcc.cfgr
 
 // <<< GENERATED END >>>
 
-    let delay_ms = &|ms:u32|{
-        cortex_m::asm::delay(ms.saturating_mul(&clocks.sysclk().to_Hz() / 1_000));
+    let delay_micro_seconds = |ms:u32|{
+        cortex_m::asm::delay(ms.saturating_mul(&clocks.sysclk().to_Hz() / 1_000_000));
     };
 
 
@@ -73,74 +73,59 @@ let clocks = rcc.cfgr
     //display.flush().unwrap();
 
 
+
+
+
+    let mut radar = mw_radar::MicrowaveRadar::new(_tx1_mw_radar, _rx1_mw_radar, delay_micro_seconds);
+
+
     //----------------------
     let mut parser_params = mw_radar::read_param::ReadParam::new_parser();
     //----------------------
-
-    begin_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar,delay_ms);
+    radar.begin_config();
+    // begin_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar,&delay_ms);
     {
-        let radar_range_gate_val:Option<u32> = mw_radar::utils::get_param_value(
-            &mut _tx1_mw_radar,&mut _rx1_mw_radar
-            ,mw_radar::data::ParameterID::Range
-            ,&mut parser_params
-            ,delay_ms
-        );
+        let radar_range_gate_val:Option<u32> = radar.get_param_value( mw_radar::data::ParameterID::Range ,&mut parser_params);
 
-
-        let mut out = [0u8; 32]; 
-
-        pins::utils::i2c1::wtrite_to_display(&mut display
-            ,format_text_with_u32("Range: ",radar_range_gate_val.unwrap_or_default(), "", &mut out)
-            ,0);
-    }
-    //----------------------
-    {
-        let radar_delay_gate_val:Option<u32> = mw_radar::utils::get_param_value(
-            &mut _tx1_mw_radar,&mut _rx1_mw_radar
-            ,mw_radar::data::ParameterID::Delay
-            ,&mut parser_params
-            ,delay_ms
-        );
 
         let mut out = [0u8; 32];
 
         pins::utils::i2c1::wtrite_to_display(&mut display
-            ,format_text_with_u32("Delay: ",radar_delay_gate_val.unwrap_or_default(), " sec", &mut out)
+            ,pins::utils::i2c1::format_text_with_u32("Range: ",radar_range_gate_val.unwrap_or_default(), "", &mut out)
+            ,0);
+    }
+    //----------------------
+    {
+        let radar_delay_gate_val:Option<u32> = radar.get_param_value(mw_radar::data::ParameterID::Delay,&mut parser_params);
+
+        let mut out = [0u8; 32];
+
+        pins::utils::i2c1::wtrite_to_display(&mut display
+            ,pins::utils::i2c1::format_text_with_u32("Delay: ",radar_delay_gate_val.unwrap_or_default(), " sec", &mut out)
             ,11);
     }
 
 
 
-    // pins::utils::i2c1::wtrite_to_display(&mut display
-    // ,format_text_with_u32_2inline(
-    // "Range=",decode(radar_tt_00_val.unwrap_or_default())
-    // ," Delay=",decode(radar_ht_00_val.unwrap_or_default())
-    // , &mut out)
-    // ,22);
-
     //----------------------
     {
-        let radar_tt_00_val:Option<u32> = mw_radar::utils::get_param_value(
-            &mut _tx1_mw_radar,&mut _rx1_mw_radar
-            ,mw_radar::data::ParameterID::TriggerThreshold00
+        let radar_tt_00_val:Option<u32> = radar.get_param_value(
+            mw_radar::data::ParameterID::TriggerThreshold00
             ,&mut parser_params
-            ,delay_ms
         );
 
-        let radar_ht_00_val:Option<u32> = mw_radar::utils::get_param_value(
-            &mut _tx1_mw_radar,&mut _rx1_mw_radar
-            ,mw_radar::data::ParameterID::HoldThreshold00
+        let radar_ht_00_val:Option<u32> = radar.get_param_value(
+            mw_radar::data::ParameterID::HoldThreshold00
             ,&mut parser_params
-            ,delay_ms
         );
 
 
         let mut out = [0u8; 32];
 
         pins::utils::i2c1::wtrite_to_display(&mut display
-            ,format_text_with_u32_2inline(
-                "00 tt=",decode_threschold_value(radar_tt_00_val.unwrap_or_default())
-                ," ht=",decode_threschold_value(radar_ht_00_val.unwrap_or_default())
+            ,pins::utils::i2c1::format_text_with_u32_2inline(
+                "00 tt=",mw_radar::read::decode_threschold_value(radar_tt_00_val.unwrap_or_default())
+                ," ht=",mw_radar::read::decode_threschold_value(radar_ht_00_val.unwrap_or_default())
                 , &mut out)
             ,22);
     }
@@ -148,23 +133,17 @@ let clocks = rcc.cfgr
     display.flush().unwrap();
 
 
-    delay_ms(10000);
+    delay_micro_seconds(5000000);
 
-    end_save_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar,delay_ms);
+    radar.end_save_config();
 
-    // cortex_m::asm::delay(999_999_999);//72MHz
     // ── Loop principal ────────────────────────────────────────────────────────
 
-
-    let radar_range_gate:u32 = 0;//0-15 * 70cm
-    let radar_delay_sec:u32 = 2; // 1 - 999 999 99
-
+    let radar_range_gate:u32 = 1;//0-15 * 70cm
+    let radar_delay_sec:u32 = 5; // 1 - 999 999 99
 
 
-    send_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar, radar_range_gate as f32 , radar_delay_sec as f32, 48.93,delay_ms);
-
-
-
+    radar.send_config(radar_range_gate as f32 , radar_delay_sec as f32, 48.93);
 
 
     let mut buf_a:  [u8; 10]  = [0; 10];
@@ -180,53 +159,55 @@ let clocks = rcc.cfgr
             pc13_out_board_led.set_high();
         }
 
+        radar.read_data(|rx| {
 
-        if let Ok(b) = _rx1_mw_radar.read() {
+                if let Ok(b) = rx.read() {
 
-            if parser.feed(b) {
-                let frame = mw_radar::read_report::HmmdFrame::decode(&parser.payload);
-                // ── Render display ────────────────────────────────────────────
-                pins::utils::i2c1::clear_display(&mut display);
-                // Rand 0 (y=0): "PREZENT" / "ABSENT " + distanta filtrata
-                // ex: "PREZENT 245cm"
-                {
-                    let mut pos = 0usize;
+                    if parser.feed(b) {
+                        let frame = mw_radar::read_report::HmmdFrame::decode(&parser.payload);
+                        // ── Render display ────────────────────────────────────────────
+                        pins::utils::i2c1::clear_display(&mut display);
+                        // Rand 0 (y=0): "PREZENT" / "ABSENT " + distanta filtrata
+                        // ex: "PREZENT 245cm"
+                        {
+                            let mut pos = 0usize;
 
-                    pins::utils::i2c1::wtrite_to_display(&mut display,
-                        if frame.present { "PREZENT" } else { "ABSENT" }
-                        , 0);
+                            pins::utils::i2c1::wtrite_to_display(&mut display,
+                                if frame.present { "PREZENT" } else { "ABSENT" }
+                                , 0);
 
-                    //for &c in status { lbuf[pos] = c; pos += 1; }
-                    if frame.present {
-                        let sd = fmt_u16(frame.distance_cm, &mut buf_a);
-                        for &c in sd.as_bytes() { lbuf[pos] = c; pos += 1; }
-                        for &c in b"cm" { lbuf[pos] = c; pos += 1; }
+                            //for &c in status { lbuf[pos] = c; pos += 1; }
+                            if frame.present {
+                                let sd = pins::utils::i2c1::fmt_u16(frame.distance_cm, &mut buf_a);
+                                for &c in sd.as_bytes() { lbuf[pos] = c; pos += 1; }
+                                for &c in b"cm" { lbuf[pos] = c; pos += 1; }
+                            }
+                            pins::utils::i2c1::wtrite_to_display_font10x20(&mut display,
+                                core::str::from_utf8(&lbuf[..pos]).unwrap_or("?")
+                                , 12);
+                        }
+
+                        // //Rand 2 (y=22): "E0:nnn E1:nnn E2:nnn" primele 3 gate-uri
+                        // //(cele mai relevante pentru detectie apropiata)
+                        {
+                            let mut pos = 0usize;
+                            for i in 0..1usize {
+                                let label = [b'E', b'0' + i as u8, b':'];
+                                for &c in &label { lbuf[pos] = c; pos += 1; }
+                                let se = pins::utils::i2c1::fmt_u16(frame.energy[i], &mut buf_a);
+                                for &c in se.as_bytes() { lbuf[pos] = c; pos += 1; }
+                                if i < 2 { lbuf[pos] = b' '; pos += 1; }
+                            }
+                            let t = core::str::from_utf8(&lbuf[..pos]).unwrap_or("?");
+                            pins::utils::i2c1::wtrite_to_display(&mut display,t, 25);
+                        }
+
+
+                        display.flush().unwrap();
                     }
-                    pins::utils::i2c1::wtrite_to_display_font10x20(&mut display,
-                        core::str::from_utf8(&lbuf[..pos]).unwrap_or("?")
-                        , 12);
+
                 }
-
-                // //Rand 2 (y=22): "E0:nnn E1:nnn E2:nnn" primele 3 gate-uri
-                // //(cele mai relevante pentru detectie apropiata)
-                {
-                    let mut pos = 0usize;
-                    for i in 0..1usize {
-                        let label = [b'E', b'0' + i as u8, b':'];
-                        for &c in &label { lbuf[pos] = c; pos += 1; }
-                        let se = fmt_u16(frame.energy[i], &mut buf_a);
-                        for &c in se.as_bytes() { lbuf[pos] = c; pos += 1; }
-                        if i < 2 { lbuf[pos] = b' '; pos += 1; }
-                    }
-                    let t = core::str::from_utf8(&lbuf[..pos]).unwrap_or("?");
-                    pins::utils::i2c1::wtrite_to_display(&mut display,t, 25);
-                }
-
-
-                display.flush().unwrap();
-            }
-
-        }
+        });
 
 
         // pins::utils::gpio_out::led_blink(pc13_out_board_led, clocks.sysclk().to_Hz() / 1);

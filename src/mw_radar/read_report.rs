@@ -1,11 +1,10 @@
 
 use super::{Parser,ParserResult};
 
-/// Header si tail frame-uri de raportare (diferite de header comanda!)
 const CMD_HEADER: [u8; 4] = [0xF4, 0xF3, 0xF2, 0xF1];
 const CMD_TAIL:   [u8; 4] = [0xF8, 0xF7, 0xF6, 0xF5];
 
-/// Payload = 1 (status) + 2 (distanta cm) + 32 (energie 16 gate-uri) = 35 bytes
+/// Payload = 1 (status) + 2 (distance cm) + 32 (16 gates energy)
 const PAYLOAD_LEN: usize = 35;
 
 const EXPECTED_CMD_ID: u16  = super::CommandID::None.raw();

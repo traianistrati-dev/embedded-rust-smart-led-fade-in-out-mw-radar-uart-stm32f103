@@ -188,3 +188,12 @@ const EXPECTED_CMD_ID: u16,
         }
     }
 }
+
+
+pub fn decode_threschold_value(value: u32) -> f32 {
+    if value == 0 {
+        return 0.0;
+    }
+
+    10.0 * libm::log10f(value as f32)
+}
