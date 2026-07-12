@@ -8,7 +8,7 @@ const PAYLOAD_LEN: usize = 4;
 const EXPECTED_CMD_ID: u16  = super::CommandID::ReadParamAck.raw();
 const RESERVED_LEN: usize = 2;
 
-type ParserType = Parser<PAYLOAD_LEN,  RESERVED_LEN,EXPECTED_CMD_ID>;
+type ParserType = Parser<PAYLOAD_LEN, RESERVED_LEN,EXPECTED_CMD_ID>;
 
 
 pub struct ReadParam;

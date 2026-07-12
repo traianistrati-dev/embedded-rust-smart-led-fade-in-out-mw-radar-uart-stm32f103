@@ -33,17 +33,18 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
         Self { delay:delay_fn, tx,rx}
     }
 
-	// pub get_rx(&mut self) -> &mut UsartRxType{
-		// &mut self.rx
-	// }
 
+    pub fn read_data(&mut self,mut read_fn:impl FnMut(&mut UsartRxType)){
+        read_fn(&mut self.rx);
+    }
 
+    pub fn read_byte(&mut self,mut read_fn:impl FnMut(u8)){
+        if let Ok(b) = self.rx.read() {
+            read_fn(b);
+        }
+    }
 
-	pub fn read_data(&mut self,mut read_fn:impl FnMut(&mut UsartRxType)){
-		read_fn(&mut self.rx);
-	}	
-
-    pub fn delay_ms(&self, ms:u32) {
+    pub fn delay_micro_seconds(&self, ms:u32) {
 
         self.delay.delay_ms(ms);
     }
@@ -87,8 +88,9 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
     pub fn send_cmd_and_get_result<const S:usize,const PAYLOAD_LEN: usize, const RESERVED_LEN: usize, const EXPECTED_CMD_ID: u16, RESULT>(
         &mut self,
         data:SerialCmdDynamicResult<S>,
-        parser:&mut super::Parser<PAYLOAD_LEN,RESERVED_LEN,EXPECTED_CMD_ID>,
+        parser: &mut super::Parser<PAYLOAD_LEN,RESERVED_LEN,EXPECTED_CMD_ID>,
         decoder: fn(&[u8]) -> RESULT,
+        //parser2:impl super::ParserResult<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, RESULT>
 
     ) -> Option<RESULT>
     {
@@ -98,9 +100,10 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
             for &b in &data.send {
                 nb::block!(tx.write(b)).ok();
             }
+            tx.flush().unwrap_or_default();
         }
 
-        self.delay_ms(data.wait_micro_seconds);
+        self.delay_micro_seconds(data.wait_micro_seconds);
 
         {//read data from rx
             parser.clear();
@@ -147,9 +150,10 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
             for &b in &data.send {
                 nb::block!(tx.write(b)).ok();
             }
+            tx.flush().unwrap_or_default();
         }
 
-        self.delay_ms(data.wait_micro_seconds);
+        self.delay_micro_seconds(data.wait_micro_seconds);
 
         {//read data from rx
             if !data.result_ack.is_empty() {

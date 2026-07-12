@@ -11,6 +11,9 @@ use panic_halt as _;
 mod mw_radar;
 use mw_radar::read::ParserResult;
 
+mod menu_navigator;
+use menu_navigator::rotary_encoder;
+
 
 // <<< GENERATED BEGIN — do not edit between these markers >>>
 use stm32f1xx_hal::{
@@ -64,16 +67,8 @@ let clocks = rcc.cfgr
 
     let mut display = pins::utils::i2c1::get_display_128x32(_i2c1_128x32_display);
 
-    /**/
 
     pins::utils::i2c1::clear_display(&mut display);
-
-    //pins::utils::i2c1::wtrite_to_display(&mut display,"HMMD mmWave", 0);
-    // pins::utils::i2c1::wtrite_to_display(&mut display,"Waiting...", 11);
-    //display.flush().unwrap();
-
-
-
 
 
     let mut radar = mw_radar::MicrowaveRadar::new(_tx1_mw_radar, _rx1_mw_radar, delay_micro_seconds);
@@ -82,10 +77,9 @@ let clocks = rcc.cfgr
     //----------------------
     let mut parser_params = mw_radar::read_param::ReadParam::new_parser();
     //----------------------
-    radar.begin_config();
-    // begin_config(&mut _tx1_mw_radar,&mut _rx1_mw_radar,&delay_ms);
+    //radar.begin_config();
     {
-        let radar_range_gate_val:Option<u32> = radar.get_param_value( mw_radar::data::ParameterID::Range ,&mut parser_params);
+        let radar_range_gate_val: Option<u32> = radar.get_param_value( mw_radar::data::ParameterID::Range ,&mut parser_params);
 
 
         let mut out = [0u8; 32];
@@ -135,11 +129,11 @@ let clocks = rcc.cfgr
 
     delay_micro_seconds(5000000);
 
-    radar.end_save_config();
+    //radar.end_save_config();
 
     // ── Loop principal ────────────────────────────────────────────────────────
 
-    let radar_range_gate:u32 = 1;//0-15 * 70cm
+    let radar_range_gate:u32 = 0;//0-15 * 70cm
     let radar_delay_sec:u32 = 5; // 1 - 999 999 99
 
 
@@ -159,54 +153,50 @@ let clocks = rcc.cfgr
             pc13_out_board_led.set_high();
         }
 
-        radar.read_data(|rx| {
 
-                if let Ok(b) = rx.read() {
+        radar.read_byte(|b| {
 
-                    if parser.feed(b) {
-                        let frame = mw_radar::read_report::HmmdFrame::decode(&parser.payload);
-                        // ── Render display ────────────────────────────────────────────
-                        pins::utils::i2c1::clear_display(&mut display);
-                        // Rand 0 (y=0): "PREZENT" / "ABSENT " + distanta filtrata
-                        // ex: "PREZENT 245cm"
-                        {
-                            let mut pos = 0usize;
 
-                            pins::utils::i2c1::wtrite_to_display(&mut display,
-                                if frame.present { "PREZENT" } else { "ABSENT" }
-                                , 0);
+                if parser.feed(b) {
+                    let frame = mw_radar::read_report::HmmdFrame::decode(&parser.payload);
+                    // ── Render display ────────────────────────────────────────────
+                    pins::utils::i2c1::clear_display(&mut display);
 
-                            //for &c in status { lbuf[pos] = c; pos += 1; }
-                            if frame.present {
-                                let sd = pins::utils::i2c1::fmt_u16(frame.distance_cm, &mut buf_a);
-                                for &c in sd.as_bytes() { lbuf[pos] = c; pos += 1; }
-                                for &c in b"cm" { lbuf[pos] = c; pos += 1; }
-                            }
-                            pins::utils::i2c1::wtrite_to_display_font10x20(&mut display,
-                                core::str::from_utf8(&lbuf[..pos]).unwrap_or("?")
-                                , 12);
+                    {//read Range and Delay
+                        let mut pos = 0usize;
+
+                        pins::utils::i2c1::wtrite_to_display(&mut display,
+                            if frame.present { "PREZENT" } else { "ABSENT" }
+                            , 0);
+
+                        //for &c in status { lbuf[pos] = c; pos += 1; }
+                        if frame.present {
+                            let sd = pins::utils::i2c1::fmt_u16(frame.distance_cm, &mut buf_a);
+                            for &c in sd.as_bytes() { lbuf[pos] = c; pos += 1; }
+                            for &c in b"cm" { lbuf[pos] = c; pos += 1; }
                         }
-
-                        // //Rand 2 (y=22): "E0:nnn E1:nnn E2:nnn" primele 3 gate-uri
-                        // //(cele mai relevante pentru detectie apropiata)
-                        {
-                            let mut pos = 0usize;
-                            for i in 0..1usize {
-                                let label = [b'E', b'0' + i as u8, b':'];
-                                for &c in &label { lbuf[pos] = c; pos += 1; }
-                                let se = pins::utils::i2c1::fmt_u16(frame.energy[i], &mut buf_a);
-                                for &c in se.as_bytes() { lbuf[pos] = c; pos += 1; }
-                                if i < 2 { lbuf[pos] = b' '; pos += 1; }
-                            }
-                            let t = core::str::from_utf8(&lbuf[..pos]).unwrap_or("?");
-                            pins::utils::i2c1::wtrite_to_display(&mut display,t, 25);
-                        }
-
-
-                        display.flush().unwrap();
+                        pins::utils::i2c1::wtrite_to_display_font10x20(&mut display,
+                            core::str::from_utf8(&lbuf[..pos]).unwrap_or("?")
+                            , 12);
                     }
 
+                    {//read Gates energy values
+                        let mut pos = 0usize;
+                        for i in 0..1usize {
+                            let label = [b'E', b'0' + i as u8, b':'];
+                            for &c in &label { lbuf[pos] = c; pos += 1; }
+                            let se = pins::utils::i2c1::fmt_u16(frame.energy[i], &mut buf_a);
+                            for &c in se.as_bytes() { lbuf[pos] = c; pos += 1; }
+                            if i < 2 { lbuf[pos] = b' '; pos += 1; }
+                        }
+                        let t = core::str::from_utf8(&lbuf[..pos]).unwrap_or("?");
+                        pins::utils::i2c1::wtrite_to_display(&mut display,t, 25);
+                    }
+
+
+                    display.flush().unwrap();
                 }
+
         });
 
 
