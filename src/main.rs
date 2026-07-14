@@ -99,8 +99,6 @@ let clocks = rcc.cfgr
             ,11);
     }
 
-
-
     //----------------------
     {
         let radar_tt_00_val:Option<u32> = radar.get_param_value(

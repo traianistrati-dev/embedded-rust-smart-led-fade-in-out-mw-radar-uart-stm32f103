@@ -1,6 +1,6 @@
 use stm32f1xx_hal::pac;
 
-use super::{ParameterID, SerialCmdWithACK,SerialCmdDynamicResult, ParserResult};
+use super::{ParameterID, SerialCmdWithACK, ParserResult};
 
 
 type UsartTxType = stm32f1xx_hal::serial::Tx<pac::USART1>;
@@ -34,9 +34,9 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
     }
 
 
-    pub fn read_data(&mut self,mut read_fn:impl FnMut(&mut UsartRxType)){
-        read_fn(&mut self.rx);
-    }
+    // pub fn read_data(&mut self,mut read_fn:impl FnMut(&mut UsartRxType)){
+        // read_fn(&mut self.rx);
+    // }
 
     pub fn read_byte(&mut self,mut read_fn:impl FnMut(u8)){
         if let Ok(b) = self.rx.read() {
@@ -77,7 +77,7 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
 
 
         self.send_cmd_and_get_result(
-            SerialCmdDynamicResult::send_read_param_value(param_id)
+            SerialCmdWithACK::send_read_param_value(param_id)
             ,parser
             , super::read_param::ReadParam::decode
         )
@@ -85,9 +85,10 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
     }
 
 
+
     pub fn send_cmd_and_get_result<const S:usize,const PAYLOAD_LEN: usize, const RESERVED_LEN: usize, const EXPECTED_CMD_ID: u16, RESULT>(
         &mut self,
-        data:SerialCmdDynamicResult<S>,
+        data:SerialCmdWithACK<S,0>,
         parser: &mut super::Parser<PAYLOAD_LEN,RESERVED_LEN,EXPECTED_CMD_ID>,
         decoder: fn(&[u8]) -> RESULT,
         //parser2:impl super::ParserResult<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, RESULT>

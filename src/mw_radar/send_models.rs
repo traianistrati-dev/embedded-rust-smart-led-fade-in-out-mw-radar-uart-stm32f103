@@ -9,12 +9,12 @@ pub struct SerialCmdWithACK<const S:usize,const R:usize>{
 
 }
 
-pub struct SerialCmdDynamicResult<const S:usize>{
+// pub struct SerialCmdDynamicResult<const S:usize>{
 
-    pub send: [u8;S],
-    pub wait_micro_seconds: u32,
+    // pub send: [u8;S],
+    // pub wait_micro_seconds: u32,
 
-}
+// }
 ///
 //send FD FC FB FA 08 00 07 00 01 00 02 00 00 00 04 03 02 01
 //result ACK FD FC FB FA_ 04 00 _07 01_ 00 00 04 03 02 01
@@ -58,30 +58,30 @@ impl SerialCmdWithACK<18,14>{
 
     }
 }
-///
-//send FD FC FB FA 04 00 08 00 01 00 04 03 02 01
-//result ACK FD FC FB FA 08 00 08 01 00 00  0F 00 00 00  04 03 02 01
-impl SerialCmdDynamicResult<14>{
+// ///
+// //send FD FC FB FA 04 00 08 00 01 00 04 03 02 01
+// //result ACK FD FC FB FA 08 00 08 01 00 00  0F 00 00 00  04 03 02 01
+// impl SerialCmdDynamicResult<14>{
 
 
-    pub fn send_read_param_value(param_id:ParameterID) -> Self{
+    // pub fn send_read_param_value(param_id:ParameterID) -> Self{
 
-        let cmd_id_2b = CommandID::ReadParam.get_bytes();
-        let param_id_2b = param_id.get_bytes();
+        // let cmd_id_2b = CommandID::ReadParam.get_bytes();
+        // let param_id_2b = param_id.get_bytes();
 
-        Self {
-            send: [
-                SEND_HEADER[0], SEND_HEADER[1], SEND_HEADER[2], SEND_HEADER[3],
-                0x04, 0x00,//data lenght
-                cmd_id_2b[0], cmd_id_2b[1],
-                param_id_2b[0],param_id_2b[1],
-                SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
-            ],
-            wait_micro_seconds: 50,
-        }
+        // Self {
+            // send: [
+                // SEND_HEADER[0], SEND_HEADER[1], SEND_HEADER[2], SEND_HEADER[3],
+                // 0x04, 0x00,//data lenght
+                // cmd_id_2b[0], cmd_id_2b[1],
+                // param_id_2b[0],param_id_2b[1],
+                // SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
+            // ],
+            // wait_micro_seconds: 50,
+        // }
 
-    }
-}
+    // }
+// }
 ///
 //sent FD FC FB FA 04 00 FF 00 02 00 04 03 02 01
 //result ACK FD FC FB FA 08 00 FF 01 00 00 02 00 20 00 04 03 02 01
@@ -143,37 +143,37 @@ impl SerialCmdWithACK<12,14>{
 
 }
 
-///
-//send FD FC FB FA 08 00 12 00 00 00 04 00 00 00 04 03 02 01
-//result: 45 byte
-//F4 F3 F2 F1
-//23 00 //2 bytes detection result, target distance, and energy values for each distance gate
-//01 // 1 byte, 00 absent, 01 present
-//07 00 //2 bytes indicating the distance of the target phase from the radar in the scene
-//DA A3 C9 D8 39 08 12 00 28 00 94 00 44 00 91 00 31 00 7A 00 6D 00 52 00 6D 00 35 00 65 00 41 00
-///16 (total number of distance gates) * 2 bytes, size of energy value for each distance gate from 0 to 15
-//F8 F7 F6 F5
-// impl SerialCmdDynamicResult<18>{
-impl SerialCmdWithACK<18,0>{
-    pub fn set_report_mode() -> Self{
+// ///
+// //send FD FC FB FA 08 00 12 00 00 00 04 00 00 00 04 03 02 01
+// //result: 45 byte
+// //F4 F3 F2 F1
+// //23 00 //2 bytes detection result, target distance, and energy values for each distance gate
+// //01 // 1 byte, 00 absent, 01 present
+// //07 00 //2 bytes indicating the distance of the target phase from the radar in the scene
+// //DA A3 C9 D8 39 08 12 00 28 00 94 00 44 00 91 00 31 00 7A 00 6D 00 52 00 6D 00 35 00 65 00 41 00
+// ///16 (total number of distance gates) * 2 bytes, size of energy value for each distance gate from 0 to 15
+// //F8 F7 F6 F5
+// // impl SerialCmdDynamicResult<18>{
+// impl SerialCmdWithACK<18,0>{
+    // pub fn set_report_mode() -> Self{
 
-        let cmd_id_2b = CommandID::ReportMode.get_bytes();
+        // let cmd_id_2b = CommandID::ReportMode.get_bytes();
 
 
-        Self {
-            send: [
-                SEND_HEADER[0], SEND_HEADER[1], SEND_HEADER[2], SEND_HEADER[3],
-                0x08, 0x00,//data lenght
-                cmd_id_2b[0], cmd_id_2b[1],
-                0x00, 0x00,0x04, 0x00,0x00, 0x00,
-                SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
-            ],
-            result_ack:[],
-            wait_micro_seconds: 50,
-        }
-    }
+        // Self {
+            // send: [
+                // SEND_HEADER[0], SEND_HEADER[1], SEND_HEADER[2], SEND_HEADER[3],
+                // 0x08, 0x00,//data lenght
+                // cmd_id_2b[0], cmd_id_2b[1],
+                // 0x00, 0x00,0x04, 0x00,0x00, 0x00,
+                // SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
+            // ],
+            // result_ack:[],
+            // wait_micro_seconds: 50,
+        // }
+    // }
 
-}
+// }
 
 
 
