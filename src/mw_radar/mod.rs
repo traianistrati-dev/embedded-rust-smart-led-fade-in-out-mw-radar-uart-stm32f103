@@ -1,14 +1,14 @@
-// New file
+
 pub mod data;
 pub mod send_models;
-pub mod read_report;
+pub mod report_mode;
 pub mod read;
-pub mod read_param;
+pub mod parameter;
 pub mod radar;
-pub mod read_report_debug;
+pub mod report_debug_mode;
 
 pub use radar::*;
 pub use data::*;
 pub use send_models::*;
 pub use read::*;
-pub use read_report_debug::*;
+pub use report_debug_mode::*;

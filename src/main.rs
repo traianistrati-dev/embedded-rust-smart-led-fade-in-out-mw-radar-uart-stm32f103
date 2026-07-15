@@ -56,7 +56,7 @@ let clocks = rcc.cfgr
 
 // <<< GENERATED END >>>
 
-    let delay_micro_seconds = |ms:u32|{
+    let delay_micro_seconds_fn = |ms:u32|{
         cortex_m::asm::delay(ms.saturating_mul(&clocks.sysclk().to_Hz() / 1_000_000));
     };
 
@@ -71,11 +71,11 @@ let clocks = rcc.cfgr
     pins::utils::i2c1::clear_display(&mut display);
 
 
-    let mut radar = mw_radar::MicrowaveRadar::new(_tx1_mw_radar, _rx1_mw_radar, delay_micro_seconds);
+    let mut radar = mw_radar::MicrowaveRadar::new(_tx1_mw_radar, _rx1_mw_radar, delay_micro_seconds_fn);
 
 
     //----------------------
-    let mut parser_params = mw_radar::read_param::ReadParam::new_parser();
+    let mut parser_params = mw_radar::parameter::ReadParam::new_parser();
     //----------------------
     //radar.begin_config();
     {
@@ -125,7 +125,7 @@ let clocks = rcc.cfgr
     display.flush().unwrap();
 
 
-    delay_micro_seconds(5000000);
+    delay_micro_seconds_fn(5000000);
 
     //radar.end_save_config();
 
@@ -135,14 +135,14 @@ let clocks = rcc.cfgr
     let radar_delay_sec:u32 = 5; // 1 - 999 999 99
 
 
-    radar.send_config(radar_range_gate as f32 , radar_delay_sec as f32, 48.93);
+    radar.send_config_example1(radar_range_gate as f32 , radar_delay_sec as f32, 48.93);
 
 
     let mut buf_a:  [u8; 10]  = [0; 10];
     let mut lbuf:  [u8; 24] = [0; 24];
     //let mut buf_b:  [u8; 8]  = [0; 8];
 
-    let mut parser = mw_radar::read_report::HmmdFrame::new_parser();
+    let mut parser = mw_radar::report_mode::HmmdFrame::new_parser();
     loop {
 
         if pb5_in_mw_ot2.is_high(){
@@ -156,7 +156,7 @@ let clocks = rcc.cfgr
 
 
                 if parser.feed(b) {
-                    let frame = mw_radar::read_report::HmmdFrame::decode(&parser.payload);
+                    let frame = mw_radar::report_mode::HmmdFrame::decode(&parser.payload);
                     // ── Render display ────────────────────────────────────────────
                     pins::utils::i2c1::clear_display(&mut display);
 

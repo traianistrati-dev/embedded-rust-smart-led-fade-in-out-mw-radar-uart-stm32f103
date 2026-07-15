@@ -1,11 +1,12 @@
 use stm32f1xx_hal::pac;
 
-use super::{ParameterID, SerialCmdWithACK, ParserResult};
-
-
 type UsartTxType = stm32f1xx_hal::serial::Tx<pac::USART1>;
 type UsartRxType = stm32f1xx_hal::serial::Rx<pac::USART1>;
 
+// <>
+
+
+use super::{ParameterID, SerialCmdWithACK, ParserResult};
 
 pub struct MicrowaveRadar<DELAY:DelayMs>{
 
@@ -34,11 +35,6 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
         Self { delay:delay_fn, tx,rx}
     }
 
-
-    // pub fn read_data(&mut self,mut read_fn:impl FnMut(&mut UsartRxType)){
-        // read_fn(&mut self.rx);
-    // }
-
     pub fn read_byte(&mut self,mut read_fn:impl FnMut(u8)){
         if let Ok(b) = self.rx.read() {
             read_fn(b);
@@ -50,7 +46,7 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
         self.delay.delay_ms(ms);
     }
 
-    pub fn send_config(&mut self, max_range:f32, delay_sec:f32, trigger_treschold_00:f32){
+    pub fn send_config_example1(&mut self, max_range:f32, delay_sec:f32, trigger_treschold_00:f32){
 
 
         self.begin_config();
@@ -60,11 +56,9 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
         self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Delay, delay_sec));
         self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00));
 
-
         self.send_cmd(SerialCmdWithACK::set_report_mode());
 
         self.end_save_config();
-
 
     }
 
@@ -78,9 +72,9 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
 
 
         self.send_cmd_and_get_result(
-            SerialCmdWithACK::send_read_param_value(param_id)
+            SerialCmdWithACK::read_param_value(param_id)
             ,parser
-            , super::read_param::ReadParam::decode
+            , super::parameter::ReadParam::decode
         )
 
     }

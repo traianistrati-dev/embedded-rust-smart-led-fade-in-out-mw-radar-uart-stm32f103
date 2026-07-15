@@ -1,23 +1,22 @@
-// New file
 
 use super::{Parser,ParserResult, CommandID};
 
 const CMD_HEADER: [u8; 4] = [0xAA, 0xBF, 0x10, 0x14];
 const CMD_TAIL:   [u8; 4] = [0xFD, 0xFC, 0xFB, 0xFA];
 
-/// Payload = 1 (status) + 2 (distance cm) + 32 (16 gates energy)
 const PAYLOAD_LEN: usize = 1280;
 
-const EXPECTED_CMD_ID: u16  = CommandID::ReportMode.raw();
+const COMMAND_ID: CommandID  = CommandID::ReportMode;
+
+const EXPECTED_CMD_ID: u16  = COMMAND_ID.raw();
 const RESERVED_LEN: usize = 0;
 
-type ParserType = Parser<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID>;
+type ParserType = Parser<PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>;
 
-
+///Represents an 2D array of 20Doppler x 16RangeGates values
 pub struct HmmdRdmapFrame {
     pub rdmap:[[u32; 16]; 20]
 }
-
 
 
 impl ParserResult<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdRdmapFrame> for HmmdRdmapFrame {
@@ -64,7 +63,7 @@ impl ParserResult<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdRdmapFrame> f
 
 use super::{SerialCmdWithACK, SEND_HEADER,SEND_TAIL};
 
-///
+/// Command for activating debug mode
 //send FD FC FB FA 08 00 12 00 00 00 00 00 00 00 04 03 02 01
 //result: 1280
 /*
@@ -76,7 +75,7 @@ g0-g15
 
 AA BF 
 10 --16 gates
-14 --20 dopple
+14 --20 doppler
 7D 00 00 00 31 00 00 00 04 00 00 00 02 00 00 00 01 00 00 00 08 00 00 00 05 00 00 00 02 00 00 00 08 00 00 00 05 00 00 00 01 00 00 00 05 00 00 00 0D 00 00 00 05 00 00 00 05 00 00 00 09 00 00 00 
 DA 00 00 00 3A 00 00 00 08 00 00 00 0D 00 00 00 05 00 00 00 05 00 00 00 05 00 00 00 05 00 00 00 08 00 00 00 0A 00 00 00 02 00 00 00 05 00 00 00 19 00 00 00 05 00 00 00 08 00 00 00 05 00 00 00 
 5D 01 00 00 7A 00 00 00 0D 00 00 00 04 00 00 00 0A 00 00 00 01 00 00 00 05 00 00 00 02 00 00 00 05 00 00 00 05 00 00 00 05 00 00 00 14 00 00 00 05 00 00 00 0D 00 00 00 05 00 00 00 05 00 00 00 
@@ -100,9 +99,9 @@ B4 00 00 00 48 00 00 00 02 00 00 00 04 00 00 00 04 00 00 00 19 00 00 00 05 00 00
 FD FC FB FA
 */
 impl SerialCmdWithACK<18,0>{
-    pub fn set_report_mode_debug() -> Self{
+    pub fn set_report_debug_mode() -> Self{
 
-        let cmd_id_2b = CommandID::ReportMode.get_bytes();
+        let cmd_id_2b = COMMAND_ID.get_bytes();
 
 
         Self {

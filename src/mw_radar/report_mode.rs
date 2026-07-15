@@ -49,7 +49,7 @@ impl ParserResult<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdFrame> for Hm
 
 use super::{SerialCmdWithACK, CommandID, SEND_HEADER,SEND_TAIL};
 
-///
+/// Data sent by sensor after set report mode
 //send FD FC FB FA 08 00 12 00 00 00 04 00 00 00 04 03 02 01
 //result: 45 byte
 //F4 F3 F2 F1
@@ -59,7 +59,6 @@ use super::{SerialCmdWithACK, CommandID, SEND_HEADER,SEND_TAIL};
 //DA A3 C9 D8 39 08 12 00 28 00 94 00 44 00 91 00 31 00 7A 00 6D 00 52 00 6D 00 35 00 65 00 41 00
 ///16 (total number of distance gates) * 2 bytes, size of energy value for each distance gate from 0 to 15
 //F8 F7 F6 F5
-// impl SerialCmdDynamicResult<18>{
 impl SerialCmdWithACK<18,0>{
     pub fn set_report_mode() -> Self{
 
