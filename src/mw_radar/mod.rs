@@ -5,8 +5,10 @@ pub mod read_report;
 pub mod read;
 pub mod read_param;
 pub mod radar;
+pub mod read_report_debug;
 
 pub use radar::*;
 pub use data::*;
 pub use send_models::*;
 pub use read::*;
+pub use read_report_debug::*;
