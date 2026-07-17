@@ -13,7 +13,7 @@ pub struct MicrowaveRadar<DELAY:DelayMs>{
     delay: DELAY,
     tx: UsartTxType,
     rx: UsartRxType,
-	
+
 }
 
 
@@ -49,16 +49,40 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
     pub fn send_config_example1(&mut self, max_range:f32, delay_sec:f32, trigger_treschold_00:f32){
 
 
-        self.begin_config();
-        self.begin_config();
+        if self.begin_config(){
 
-        self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Range, max_range));
-        self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Delay, delay_sec));
-        self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00));
+            if self.begin_config(){
 
-        self.send_cmd(SerialCmdWithACK::set_report_mode());
+                if self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Range, max_range)){
 
-        self.end_save_config();
+                    if self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Delay, delay_sec)){
+                        if self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00)){
+
+                            if self.end_save_config(){
+                                self.send_cmd(SerialCmdWithACK::set_report_mode());
+                            }
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+
+        // self.begin_config();
+        // self.begin_config();
+
+        // self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Range, max_range));
+        // self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Delay, delay_sec));
+        // self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00));
+
+        // self.send_cmd(SerialCmdWithACK::set_report_mode());
+
+        // self.end_save_config();
 
     }
 
@@ -140,7 +164,7 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
         &mut self,
         data:SerialCmdWithACK<S,R>,
 
-    ) {
+    ) -> bool{
         {//send data to tx
             let tx =  &mut self.tx;
             for &b in &data.send {
@@ -152,39 +176,60 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
         self.delay_micro_seconds(data.wait_micro_seconds);
 
         {//read data from rx
-            if !data.result_ack.is_empty() {
+            if !data.result_payload_ack.is_empty() {
 
-                // let mut rx =  &mut self.rx;
-                // let mut result_index = 0;
-                // loop{
 
-                // if let Ok(b) = rx.read(){
-                // if b != data.result_ack[result_index]{
-                // break;
-                // }
+                {//read data from rx
+                    let mut parser = super::Parser::<R, 0, { super::CommandID::None.raw() }>::new(super::SEND_HEADER, super::SEND_TAIL);
 
-                // }else{
-                // break;
-                // }
+                    parser.clear();
 
-                // result_index += 1;
+                    let mut idle_loops = 0u32;
 
-                // if result_index == data.result_ack.len(){
-                // break;
-                // }
-                // }
+                    let rx =  &mut self.rx;
+                    loop {
+                        match rx.read() {
+                            Ok(b) => {
+                                idle_loops = 0;
+
+                                if parser.feed(b) {
+
+                                    for i in 0..R{
+                                        if data.result_payload_ack[i] != parser.payload[i] {
+                                            return false;
+                                        }
+                                    }
+                                    return true;
+                                }
+                            }
+
+                            Err(nb::Error::WouldBlock) => {
+                                idle_loops += 1;
+                                if idle_loops > 50_000 {
+                                    break;
+                                }
+                            }
+
+                            Err(_) => {
+                                break;
+                            }
+                        }
+                    }
+                }
             }
+            return false;
         }
+        true
     }
 
 
 
-    pub fn begin_config(&mut self){
-        self.send_cmd(SerialCmdWithACK::begin_config());
+    pub fn begin_config(&mut self) -> bool{
+        self.send_cmd(SerialCmdWithACK::begin_config())
     }
 
-    pub fn end_save_config(&mut self){
-        self.send_cmd(SerialCmdWithACK::end_save_config());
+    pub fn end_save_config(&mut self) -> bool{
+        self.send_cmd(SerialCmdWithACK::end_save_config())
     }
 
 

@@ -73,7 +73,7 @@ impl SerialCmdWithACK<18,0>{
                 0x00, 0x00,0x04, 0x00,0x00, 0x00,
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
-            result_ack:[],
+            result_payload_ack:[],
             wait_micro_seconds: 50,
         }
     }

@@ -73,7 +73,7 @@ impl SerialCmdWithACK<14,0>{
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
             wait_micro_seconds: 50,
-            result_ack:[]
+            result_payload_ack:[]
         }
 
     }
@@ -82,7 +82,7 @@ impl SerialCmdWithACK<14,0>{
 ///
 //send FD FC FB FA 08 00 07 00 01 00 02 00 00 00 04 03 02 01
 //result ACK FD FC FB FA_ 04 00 _07 01_ 00 00 04 03 02 01
-impl SerialCmdWithACK<18,14>{
+impl SerialCmdWithACK<18,4>{
 
 
     pub fn set_param_value(param_id:ParameterID, param_value:f32) -> Self{
@@ -108,12 +108,12 @@ impl SerialCmdWithACK<18,14>{
                 param_value_4b[0],param_value_4b[1],param_value_4b[2],param_value_4b[3],
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
-            result_ack:[
-                SEND_HEADER[0], SEND_HEADER[1], SEND_HEADER[2], SEND_HEADER[3],
-                0x04, 0x00,//data lenght
+            result_payload_ack:[
+              //  SEND_HEADER[0], SEND_HEADER[1], SEND_HEADER[2], SEND_HEADER[3],
+                //0x04, 0x00,//data lenght
                 cmd_id_ack_2b[0], cmd_id_ack_2b[1],
                 0x00, 0x00,
-                SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
+               // SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
             wait_micro_seconds: 50,
 

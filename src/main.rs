@@ -9,7 +9,7 @@ use cortex_m_rt::entry;
 use panic_halt as _;
 
 mod mw_radar;
-use mw_radar::read::ParserResult;
+use mw_radar::parse_dynamic_result::ParserResult;
 
 mod menu_navigator;
 use menu_navigator::rotary_encoder;
@@ -116,8 +116,8 @@ let clocks = rcc.cfgr
 
         pins::utils::i2c1::wtrite_to_display(&mut display
             ,pins::utils::i2c1::format_text_with_u32_2inline(
-                "00 tt=",mw_radar::read::decode_threschold_value(radar_tt_00_val.unwrap_or_default())
-                ," ht=",mw_radar::read::decode_threschold_value(radar_ht_00_val.unwrap_or_default())
+                "00 tt=",mw_radar::parse_dynamic_result::decode_threschold_value(radar_tt_00_val.unwrap_or_default())
+                ," ht=",mw_radar::parse_dynamic_result::decode_threschold_value(radar_ht_00_val.unwrap_or_default())
                 , &mut out)
             ,22);
     }
