@@ -10,7 +10,7 @@ const PAYLOAD_LEN: usize = 35;
 const EXPECTED_CMD_ID: u16  = super::CommandID::None.raw();
 const RESERVED_LEN: usize = 0;
 
-type ParserType = Parser<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID>;
+type ParserType<'a> = Parser<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID>;
 
 
 pub struct HmmdFrame {
@@ -21,9 +21,9 @@ pub struct HmmdFrame {
 
 
 
-impl ParserResult<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdFrame> for HmmdFrame {
-    fn new_parser() -> ParserType {
-        ParserType::new(CMD_HEADER, CMD_TAIL)
+impl <'a>ParserResult<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdFrame> for HmmdFrame {
+    fn new_parser() -> ParserType<'a> {
+        ParserType::new(&CMD_HEADER, &CMD_TAIL)
     }
 
 

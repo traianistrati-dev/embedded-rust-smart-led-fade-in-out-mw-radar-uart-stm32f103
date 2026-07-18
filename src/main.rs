@@ -131,7 +131,7 @@ let clocks = rcc.cfgr
 
     // ── Loop principal ────────────────────────────────────────────────────────
 
-    let radar_range_gate:u32 = 0;//0-15 * 70cm
+    let radar_range_gate:u32 = 5;//0-15 * 70cm
     let radar_delay_sec:u32 = 5; // 1 - 999 999 99
 
 

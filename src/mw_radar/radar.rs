@@ -160,7 +160,7 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
     }
 
 
-    pub fn send_cmd<const S:usize, const R:usize>(
+    pub fn send_cmd<'a, const S:usize, const R:usize>(
         &mut self,
         data:SerialCmdWithACK<S,R>,
 
@@ -180,7 +180,7 @@ impl <DELAY:DelayMs> MicrowaveRadar<DELAY>{
 
 
                 {//read data from rx
-                    let mut parser = super::Parser::<R, 0, { super::CommandID::None.raw() }>::new(super::SEND_HEADER, super::SEND_TAIL);
+                    let mut parser = super::Parser::<'a, R, 0, { super::CommandID::None.raw() }>::new(&super::SEND_HEADER, &super::SEND_TAIL);
 
                     parser.clear();
 

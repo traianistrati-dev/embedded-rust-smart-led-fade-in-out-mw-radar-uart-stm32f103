@@ -11,7 +11,7 @@ const COMMAND_ID: CommandID  = CommandID::ReportMode;
 const EXPECTED_CMD_ID: u16  = COMMAND_ID.raw();
 const RESERVED_LEN: usize = 0;
 
-type ParserType = Parser<PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>;
+type ParserType<'a> = Parser<'a, PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>;
 
 ///Represents an 2D array of 20Doppler x 16RangeGates values
 pub struct HmmdRdmapFrame {
@@ -19,9 +19,9 @@ pub struct HmmdRdmapFrame {
 }
 
 
-impl ParserResult<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdRdmapFrame> for HmmdRdmapFrame {
-    fn new_parser() -> ParserType {
-        ParserType::new(CMD_HEADER, CMD_TAIL)
+impl <'a>ParserResult<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdRdmapFrame> for HmmdRdmapFrame {
+    fn new_parser() -> ParserType<'a> {
+        ParserType::new(&CMD_HEADER, &CMD_TAIL)
     }
 
 

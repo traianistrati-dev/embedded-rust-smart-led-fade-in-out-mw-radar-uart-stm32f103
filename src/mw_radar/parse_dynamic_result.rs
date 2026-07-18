@@ -7,25 +7,26 @@ enum State {
     Tail(usize),
 }
 
-pub trait ParserResult<
+pub trait ParserResult<'a,
 const PAYLOAD_LEN: usize,
 const RESERVED_LEN: usize,
 const EXPECTED_CMD_ID: u16,
 RESULT,
 > {
-    fn new_parser() -> Parser<PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>;
+    fn new_parser() -> Parser<'a, PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>;
     fn decode(payload: &[u8]) -> RESULT;
 }
 
-pub struct Parser<
+pub struct Parser<'a,
 const PAYLOAD_LEN: usize,
 const RESERVED_LEN: usize,
 const EXPECTED_CMD_ID: u16,
+
 > {
     state: State,
 
-    pub header: [u8; 4],
-    pub tail: [u8; 4],
+    pub header: &'a [u8; 4],
+    pub tail: &'a [u8; 4],
 
     pub length: u16,
     pub cmd_id: Option<u16>,
@@ -33,13 +34,14 @@ const EXPECTED_CMD_ID: u16,
     pub payload: [u8; PAYLOAD_LEN],
 }
 
-impl<
+impl<'a,
 const PAYLOAD_LEN: usize,
 const RESERVED_LEN: usize,
 const EXPECTED_CMD_ID: u16,
-> Parser<PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>
+
+> Parser<'a, PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>
 {
-    pub const fn new(header: [u8; 4], tail: [u8; 4]) -> Self {
+    pub const fn new(header: &'a[u8; 4], tail: &'a [u8; 4]) -> Self {
         Self {
             state: State::Header(0),
             header,
