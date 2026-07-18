@@ -23,16 +23,16 @@ use stm32f1xx_hal::{
 
 #[entry]
 fn main() -> ! {
-let dp = pac::Peripherals::take().unwrap();
+    let dp = pac::Peripherals::take().unwrap();
 
-let mut flash = dp.FLASH.constrain();
-let rcc = dp.RCC.constrain();
-let mut afio = dp.AFIO.constrain();
-let clocks = rcc.cfgr
-                 .use_hse(8.MHz())
-                 .sysclk(72.MHz())
-                 .pclk1(36.MHz())
-                 .freeze(&mut flash.acr);
+    let mut flash = dp.FLASH.constrain();
+    let rcc = dp.RCC.constrain();
+    let mut afio = dp.AFIO.constrain();
+    let clocks = rcc.cfgr
+    .use_hse(8.MHz())
+    .sysclk(72.MHz())
+    .pclk1(36.MHz())
+    .freeze(&mut flash.acr);
 
     let mut gpioa = dp.GPIOA.split();
     let mut gpiob = dp.GPIOB.split();
@@ -54,13 +54,7 @@ let clocks = rcc.cfgr
     let (mut _tx1_mw_radar, mut _rx1_mw_radar) = pins::configs::usart1::init(dp.USART1, (pa9_usart1_tx, pa10_usart1_rx), &mut afio, &clocks);
     let _i2c1_128x32_display = pins::configs::i2c1::init(dp.I2C1, (pb8_i2c1_scl, pb9_i2c1_sda), &mut afio, &clocks);
 
-// <<< GENERATED END >>>
-
-    let delay_micro_seconds_fn = |ms:u32|{
-        cortex_m::asm::delay(ms.saturating_mul(&clocks.sysclk().to_Hz() / 1_000_000));
-    };
-
-
+    // <<< GENERATED END >>>
 
     pc13_out_board_led.set_high();
 
@@ -71,7 +65,28 @@ let clocks = rcc.cfgr
     pins::utils::i2c1::clear_display(&mut display);
 
 
-    let mut radar = mw_radar::MicrowaveRadar::new(_tx1_mw_radar, _rx1_mw_radar, delay_micro_seconds_fn);
+
+    let delay_micro_seconds_fn = |ms:u32|{
+        cortex_m::asm::delay(ms.saturating_mul(&clocks.sysclk().to_Hz() / 1_000_000));
+    };
+
+    let usart1_tx_write_fn = |data: &[u8]| {
+
+        for &b in data {
+            nb::block!(_tx1_mw_radar.write(b)).ok();
+        }
+        _tx1_mw_radar.flush().unwrap_or_default();
+    };
+
+    let usart1_rx_read_fn = || -> Option<u8>{
+
+        match _rx1_mw_radar.read(){
+            Ok(b) => Some(b),
+            _=> None
+        }
+    };
+
+    let mut radar = mw_radar::MicrowaveRadar::new(delay_micro_seconds_fn, usart1_tx_write_fn, usart1_rx_read_fn);
 
 
     //----------------------
@@ -131,8 +146,8 @@ let clocks = rcc.cfgr
 
     // ── Loop principal ────────────────────────────────────────────────────────
 
-    let radar_range_gate:u32 = 5;//0-15 * 70cm
-    let radar_delay_sec:u32 = 5; // 1 - 999 999 99
+    let radar_range_gate:u32 = 1;//0-15 * 70cm
+    let radar_delay_sec:u32 = 3; // 1 - 999 999 99
 
 
     radar.send_config_example1(radar_range_gate as f32 , radar_delay_sec as f32, 48.93);
