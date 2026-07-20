@@ -23,16 +23,16 @@ use stm32f1xx_hal::{
 
 #[entry]
 fn main() -> ! {
-    let dp = pac::Peripherals::take().unwrap();
+let dp = pac::Peripherals::take().unwrap();
 
-    let mut flash = dp.FLASH.constrain();
-    let rcc = dp.RCC.constrain();
-    let mut afio = dp.AFIO.constrain();
-    let clocks = rcc.cfgr
-    .use_hse(8.MHz())
-    .sysclk(72.MHz())
-    .pclk1(36.MHz())
-    .freeze(&mut flash.acr);
+let mut flash = dp.FLASH.constrain();
+let rcc = dp.RCC.constrain();
+let mut afio = dp.AFIO.constrain();
+let clocks = rcc.cfgr
+                 .use_hse(8.MHz())
+                 .sysclk(72.MHz())
+                 .pclk1(36.MHz())
+                 .freeze(&mut flash.acr);
 
     let mut gpioa = dp.GPIOA.split();
     let mut gpiob = dp.GPIOB.split();
@@ -54,7 +54,7 @@ fn main() -> ! {
     let (mut _tx1_mw_radar, mut _rx1_mw_radar) = pins::configs::usart1::init(dp.USART1, (pa9_usart1_tx, pa10_usart1_rx), &mut afio, &clocks);
     let _i2c1_128x32_display = pins::configs::i2c1::init(dp.I2C1, (pb8_i2c1_scl, pb9_i2c1_sda), &mut afio, &clocks);
 
-    // <<< GENERATED END >>>
+// <<< GENERATED END >>>
 
     pc13_out_board_led.set_high();
 
@@ -140,14 +140,14 @@ fn main() -> ! {
     display.flush().unwrap();
 
 
-    delay_micro_seconds_fn(5000000);
+    delay_micro_seconds_fn(3000000);
 
     //radar.end_save_config();
 
     // ── Loop principal ────────────────────────────────────────────────────────
 
-    let radar_range_gate:u32 = 1;//0-15 * 70cm
-    let radar_delay_sec:u32 = 3; // 1 - 999 999 99
+    let radar_range_gate:u32 = 3;//0-15 * 70cm
+    let radar_delay_sec:u32 = 6; // 1 - 999 999 99
 
 
     radar.send_config_example1(radar_range_gate as f32 , radar_delay_sec as f32, 48.93);

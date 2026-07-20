@@ -33,7 +33,7 @@ FD FC FB FA 04 00 FF 00 02 00 04 03 02 01
 FD FC FB FA 04 00 08 00 01 00 04 03 02 01 -> FD FC FB FA 08 00 08 01 00 00 02 00 00 00 04 03 02 01 
 */
 
-use super::{SerialCmdWithACK, ParameterID, CommandID, SEND_HEADER,SEND_TAIL};
+use super::{SerialCmd, ParameterID, CommandID, SEND_HEADER,SEND_TAIL};
 
 ///Reading parameter value requires this parser instance
 /*
@@ -56,7 +56,7 @@ use super::{SerialCmdWithACK, ParameterID, CommandID, SEND_HEADER,SEND_TAIL};
 */
 //send FD FC FB FA 04 00 08 00 01 00 04 03 02 01
 //result ACK FD FC FB FA 08 00 08 01 00 00  0F 00 00 00  04 03 02 01
-impl SerialCmdWithACK<14,0>{
+impl SerialCmd<14,0>{
 
 
     pub fn read_param_value(param_id:ParameterID) -> Self{
@@ -82,7 +82,7 @@ impl SerialCmdWithACK<14,0>{
 ///
 //send FD FC FB FA 08 00 07 00 01 00 02 00 00 00 04 03 02 01
 //result ACK FD FC FB FA_ 04 00 _07 01_ 00 00 04 03 02 01
-impl SerialCmdWithACK<18,4>{
+impl SerialCmd<18,4>{
 
 
     pub fn set_param_value(param_id:ParameterID, param_value:f32) -> Self{

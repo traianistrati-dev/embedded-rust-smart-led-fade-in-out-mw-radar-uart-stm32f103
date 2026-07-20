@@ -61,7 +61,7 @@ impl <'a>ParserResult<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdRdmap
 }
 
 
-use super::{SerialCmdWithACK, SEND_HEADER,SEND_TAIL};
+use super::{SerialCmd, SEND_HEADER,SEND_TAIL};
 
 /// Command for activating debug mode
 //send FD FC FB FA 08 00 12 00 00 00 00 00 00 00 04 03 02 01
@@ -98,7 +98,7 @@ B4 00 00 00 48 00 00 00 02 00 00 00 04 00 00 00 04 00 00 00 19 00 00 00 05 00 00
 8A 01 00 00 75 00 00 00 1A 00 00 00 05 00 00 00 00 00 00 00 02 00 00 00 02 00 00 00 02 00 00 00 05 00 00 00 01 00 00 00 05 00 00 00 01 00 00 00 05 00 00 00 0A 00 00 00 04 00 00 00 05 00 00 00 
 FD FC FB FA
 */
-impl SerialCmdWithACK<18,0>{
+impl SerialCmd<18,0>{
     pub fn set_report_debug_mode() -> Self{
 
         let cmd_id_2b = COMMAND_ID.get_bytes();

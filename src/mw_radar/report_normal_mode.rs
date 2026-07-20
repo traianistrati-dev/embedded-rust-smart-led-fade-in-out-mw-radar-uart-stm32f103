@@ -49,19 +49,20 @@ impl <'a>ParserResult<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdFrame
 
 use super::{SerialCmd, CommandID, SEND_HEADER,SEND_TAIL};
 
-/// Set report normal mode
-//send FD FC FB FA 08 00 12 00 00 00 64 00 00 00 04 03 02 01
-//result: ASCII bytes
-//
-//
-//
-//
-//
-//
+/// Data sent by sensor after set report mode
+//send FD FC FB FA 08 00 12 00 00 00 04 00 00 00 04 03 02 01
+//result: 45 byte
+//F4 F3 F2 F1
+//23 00 //2 bytes detection result, target distance, and energy values for each distance gate
+//01 // 1 byte, 00 absent, 01 present
+//07 00 //2 bytes indicating the distance of the target phase from the radar in the scene
+//DA A3 C9 D8 39 08 12 00 28 00 94 00 44 00 91 00 31 00 7A 00 6D 00 52 00 6D 00 35 00 65 00 41 00
+///16 (total number of distance gates) * 2 bytes, size of energy value for each distance gate from 0 to 15
+//F8 F7 F6 F5
 impl SerialCmd<18,0>{
-    pub fn set_report_normal_mode() -> Self{
+    pub fn set_report_mode() -> Self{
 
-        let cmd_id_2b: [u8; 2] = CommandID::ReportMode.get_bytes();
+        let cmd_id_2b = CommandID::ReportMode.get_bytes();
 
 
         Self {
@@ -69,7 +70,7 @@ impl SerialCmd<18,0>{
                 SEND_HEADER[0], SEND_HEADER[1], SEND_HEADER[2], SEND_HEADER[3],
                 0x08, 0x00,//data lenght
                 cmd_id_2b[0], cmd_id_2b[1],
-                0x00, 0x00,0x64, 0x00,0x00, 0x00,
+                0x00, 0x00,0x04, 0x00,0x00, 0x00,
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
             result_payload_ack:[],
@@ -78,5 +79,3 @@ impl SerialCmd<18,0>{
     }
 
 }
-
-

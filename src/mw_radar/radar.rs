@@ -1,5 +1,5 @@
 
-use super::{ParameterID, SerialCmdWithACK, ParserResult};
+use super::{ParameterID, SerialCmd, ParserResult};
 
 pub struct MicrowaveRadar<DELAY:DelayMs,TX_WRITE:UsartTx,RX_READ:UsartRx>{
 
@@ -72,14 +72,14 @@ impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_W
 
             if self.begin_config(){
 
-                if self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Range, max_range)){
+                if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::Range, max_range)){
 
-                    if self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Delay, delay_sec)){
-                        if self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00)){
+                    if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::Delay, delay_sec)){
+                        if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00)){
 
                             if self.end_save_config(){
 
-                                self.send_cmd(SerialCmdWithACK::set_report_mode());
+                                self.send_cmd_and_check_ack_result(SerialCmd::set_report_mode());
                             }
                         }
 
@@ -116,7 +116,7 @@ impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_W
 
 
         self.send_cmd_and_get_result(
-            SerialCmdWithACK::read_param_value(param_id)
+            SerialCmd::read_param_value(param_id)
             ,parser
             , super::parameter::ReadParam::decode
         )
@@ -127,10 +127,9 @@ impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_W
 
     pub fn send_cmd_and_get_result<const S:usize,const PAYLOAD_LEN: usize, const RESERVED_LEN: usize, const EXPECTED_CMD_ID: u16, RESULT>(
         &mut self,
-        data:SerialCmdWithACK<S,0>,
+        data:SerialCmd<S,0>,
         parser: &mut super::Parser<PAYLOAD_LEN,RESERVED_LEN,EXPECTED_CMD_ID>,
         decoder: fn(&[u8]) -> RESULT,
-        //parser2:impl super::ParserResult<PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, RESULT>
 
     ) -> Option<RESULT>
     {
@@ -165,9 +164,9 @@ impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_W
     }
 
 
-    pub fn send_cmd<'a, const S:usize, const R:usize>(
+    pub fn send_cmd_and_check_ack_result<'a, const S:usize, const R:usize>(
         &mut self,
-        data:SerialCmdWithACK<S,R>,
+        data:SerialCmd<S,R>,
 
     ) -> bool{
         self.tx_write.write_bytes(&data.send);
@@ -214,11 +213,11 @@ impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_W
 
 
     pub fn begin_config(&mut self) -> bool{
-        self.send_cmd(SerialCmdWithACK::begin_config())
+        self.send_cmd_and_check_ack_result(SerialCmd::begin_config())
     }
 
     pub fn end_save_config(&mut self) -> bool{
-        self.send_cmd(SerialCmdWithACK::end_save_config())
+        self.send_cmd_and_check_ack_result(SerialCmd::end_save_config())
     }
 
 

@@ -1,6 +1,6 @@
 use super::{ParameterID, CommandID, SEND_HEADER, SEND_TAIL};
 
-pub struct SerialCmdWithACK<const S:usize,const R:usize>{
+pub struct SerialCmd<const S:usize,const R:usize>{
 
     pub send: [u8;S],
     pub result_payload_ack: [u8;R],
@@ -11,7 +11,7 @@ pub struct SerialCmdWithACK<const S:usize,const R:usize>{
 ///Used for initiating configuration setup, before setting parametrs values 
 //sent FD FC FB FA 04 00 FF 00 02 00 04 03 02 01
 //result ACK FD FC FB FA 08 00 FF 01 00 00 02 00 20 00 04 03 02 01
-impl SerialCmdWithACK<14,8>{
+impl SerialCmd<14,8>{
     pub fn begin_config( ) -> Self{
 
         let cmd_id_2b = CommandID::EnableConfig.get_bytes();
@@ -42,7 +42,7 @@ impl SerialCmdWithACK<14,8>{
 ///Used to save configuration data setup to sensor, at the end of finishing setting parametrs values 
 //send FD FC FB FA 02 00 FE 00 04 03 02 01
 //receieve ACK FD FC FB FA 04 00 FE 01 00 00 04 03 02 01
-impl SerialCmdWithACK<12,4>{
+impl SerialCmd<12,4>{
     pub fn end_save_config( ) -> Self{
 
         let cmd_id_2b = CommandID::EndSaveConfig.get_bytes();

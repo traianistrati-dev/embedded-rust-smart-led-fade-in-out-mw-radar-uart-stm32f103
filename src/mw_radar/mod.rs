@@ -6,6 +6,7 @@ pub mod parse_dynamic_result;
 pub mod parameter;
 pub mod radar;
 pub mod report_debug_mode;
+pub mod report_normal_mode;
 
 
 pub use radar::*;
