@@ -8,11 +8,9 @@ mod pins;
 use cortex_m_rt::entry;
 use panic_halt as _;
 
-mod mw_radar;
-use mw_radar::parse_dynamic_result::ParserResult;
+use mw_radar::parse_result::ParserResult;
 
 mod menu_navigator;
-use menu_navigator::rotary_encoder;
 
 
 // <<< GENERATED BEGIN — do not edit between these markers >>>
@@ -80,10 +78,7 @@ let clocks = rcc.cfgr
 
     let usart1_rx_read_fn = || -> Option<u8>{
 
-        match _rx1_mw_radar.read(){
-            Ok(b) => Some(b),
-            _=> None
-        }
+        _rx1_mw_radar.read().ok()
     };
 
     let mut radar = mw_radar::MicrowaveRadar::new(delay_micro_seconds_fn, usart1_tx_write_fn, usart1_rx_read_fn);
@@ -131,8 +126,8 @@ let clocks = rcc.cfgr
 
         pins::utils::i2c1::wtrite_to_display(&mut display
             ,pins::utils::i2c1::format_text_with_u32_2inline(
-                "00 tt=",mw_radar::parse_dynamic_result::decode_threschold_value(radar_tt_00_val.unwrap_or_default())
-                ," ht=",mw_radar::parse_dynamic_result::decode_threschold_value(radar_ht_00_val.unwrap_or_default())
+                "00 tt=",mw_radar::parse_result::decode_threschold_value(radar_tt_00_val.unwrap_or_default())
+                ," ht=",mw_radar::parse_result::decode_threschold_value(radar_ht_00_val.unwrap_or_default())
                 , &mut out)
             ,22);
     }
@@ -146,8 +141,8 @@ let clocks = rcc.cfgr
 
     // ── Loop principal ────────────────────────────────────────────────────────
 
-    let radar_range_gate:u32 = 3;//0-15 * 70cm
-    let radar_delay_sec:u32 = 6; // 1 - 999 999 99
+    let radar_range_gate:u32 = 15;//0-15 * 70cm
+    let radar_delay_sec:u32 = 2; // 1 - 999 999 99
 
 
     radar.send_config_example1(radar_range_gate as f32 , radar_delay_sec as f32, 48.93);
@@ -157,8 +152,11 @@ let clocks = rcc.cfgr
     let mut lbuf:  [u8; 24] = [0; 24];
     //let mut buf_b:  [u8; 8]  = [0; 8];
 
-    let mut parser = mw_radar::report_mode::HmmdFrame::new_parser();
+    let mut parser = mw_radar::report_normal_mode::HmmdFrame::new_parser();
+    //let mut parser_2 = mw_radar::report_mode::HmmdAsciiFrame::new_parser();
+ 
     loop {
+
 
         if pb5_in_mw_ot2.is_high(){
             pc13_out_board_led.set_low();
@@ -166,12 +164,27 @@ let clocks = rcc.cfgr
             pc13_out_board_led.set_high();
         }
 
-
         radar.read_byte(|b| {
+				// pins::utils::i2c1::clear_display(&mut display);
+
+                // pins::utils::i2c1::wtrite_to_display(&mut display,
+                    // core::str::from_utf8(  &[b]).unwrap_or("?")
+                    // , 22);
+
+                // if parser_2.feed(b){
+                    // let frame = mw_radar::report_mode::HmmdAsciiFrame::decode(&parser_2.payload);
+                    // pins::utils::i2c1::wtrite_to_display(&mut display,
+                        // core::str::from_utf8(  &[frame.distance_cm[0],frame.distance_cm[1],frame.distance_cm[2],frame.distance_cm[3]]).unwrap_or("?")
+                        // , 0);
+                // }else{
+                   // pins::utils::i2c1::wtrite_to_display(&mut display,"OFF", 0);
+                // }
+                // display.flush().unwrap();
 
 
+                /**/
                 if parser.feed(b) {
-                    let frame = mw_radar::report_mode::HmmdFrame::decode(&parser.payload);
+                    let frame = mw_radar::report_normal_mode::HmmdFrame::decode(&parser.payload);
                     // ── Render display ────────────────────────────────────────────
                     pins::utils::i2c1::clear_display(&mut display);
 
@@ -209,6 +222,7 @@ let clocks = rcc.cfgr
 
                     display.flush().unwrap();
                 }
+/**/
 
         });
 

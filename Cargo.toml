@@ -40,3 +40,8 @@ opt-level     = "s"
 panic     = "abort"
 opt-level = 1
 
+[workspace]
+members = ["mw_radar"]
+
+[dependencies.mw_radar]
+path = "mw_radar"

@@ -1,45 +1,47 @@
 
 use super::{Parser,ParserResult};
 
-const CMD_HEADER: [u8; 4] = [0xF4, 0xF3, 0xF2, 0xF1];
-const CMD_TAIL:   [u8; 4] = [0xF8, 0xF7, 0xF6, 0xF5];
+const CMD_HEADER: [u8; 10] = [0x4F, 0x4E, //ON
+    0x0D, 0x0A,//\n
+    0x52, 0x61, 0x6E, 0x67,0x65,//Range
+    0x20 // SP
+];
+const CMD_TAIL: [u8; 2] = [0x0D, 0x0A]; //\n
 
-/// Payload = 1 (status) + 2 (distance cm) + 32 (16 gates energy)
-const PAYLOAD_LEN: usize = 35;
 
-const EXPECTED_CMD_ID: u16  = super::CommandID::None.raw();
+/// maxuimum 4 ASCII byte
+const PAYLOAD_LEN: usize = 0;
+
+const EXPECTED_CMD_ID: u16 = super::CommandID::None.raw();
 const RESERVED_LEN: usize = 0;
 
 type ParserType<'a> = Parser<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID>;
 
 
-pub struct HmmdFrame {
-    pub present:     bool,
-    pub distance_cm: u16,
-    pub energy:      [u16; 16],
+pub struct HmmdAsciiFrame{
+    // pub distance_cm: [char;4]
+    pub distance_cm: [u8;4]
 }
 
 
 
-impl <'a>ParserResult<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdFrame> for HmmdFrame {
+impl <'a>ParserResult<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID, HmmdAsciiFrame> for HmmdAsciiFrame {
     fn new_parser() -> ParserType<'a> {
         ParserType::new(&CMD_HEADER, &CMD_TAIL)
     }
 
 
     fn decode(payload:&[u8]) -> Self{
-        let present = payload[0] != 0;
-        let distance_cm = u16::from_le_bytes([payload[1], payload[2]]);
-
-        let mut energy = [0u16; 16];
-        for i in 0..16 {
-            energy[i] = u16::from_le_bytes([payload[3 + i * 2], payload[4 + i * 2]]);
+        // let mut distance_cm = [' ';4];
+        let mut distance_cm = [0u8;4];
+        for i in 0..4{
+            // distance_cm[i] = payload[i] as char;
+            distance_cm[i] = payload[i] ;
         }
 
+
         Self {
-            present,
-            distance_cm,
-            energy,
+            distance_cm
         }
 
     }
@@ -52,14 +54,8 @@ use super::{SerialCmd, CommandID, SEND_HEADER,SEND_TAIL};
 /// Set report normal mode
 //send FD FC FB FA 08 00 12 00 00 00 64 00 00 00 04 03 02 01
 //result: ASCII bytes
-//
-//
-//
-//
-//
-//
 impl SerialCmd<18,0>{
-    pub fn set_report_normal_mode() -> Self{
+    pub fn set_report_ascii_mode() -> Self{
 
         let cmd_id_2b: [u8; 2] = CommandID::ReportMode.get_bytes();
 

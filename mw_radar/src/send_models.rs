@@ -1,4 +1,4 @@
-use super::{ParameterID, CommandID, SEND_HEADER, SEND_TAIL};
+use super::{CommandID, SEND_HEADER, SEND_TAIL};
 
 pub struct SerialCmd<const S:usize,const R:usize>{
 

@@ -1,11 +1,11 @@
 
 use super::{ParameterID, SerialCmd, ParserResult};
 
-pub struct MicrowaveRadar<DELAY:DelayMs,TX_WRITE:UsartTx,RX_READ:UsartRx>{
+pub struct MicrowaveRadar<DELAY:DelayMs,TX:UsartTx,RX:UsartRx>{
 
     delay: DELAY,
-    tx_write:TX_WRITE,
-    rx_read:RX_READ,
+    tx_write:TX,
+    rx_read:RX,
 
 }
 
@@ -43,10 +43,10 @@ impl<F> DelayMs for F where F: Fn(u32),
     }
 }
 
-impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_WRITE,RX_READ>{
+impl <DELAY:DelayMs, TX:UsartTx,RX:UsartRx> MicrowaveRadar<DELAY,TX,RX>{
 
 
-    pub fn new(delay_fn: DELAY, tx_write:TX_WRITE,rx_read:RX_READ) -> Self {
+    pub fn new(delay_fn: DELAY, tx_write:TX,rx_read:RX) -> Self {
         Self { delay:delay_fn,tx_write,rx_read}
     }
 
@@ -68,21 +68,18 @@ impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_W
     pub fn send_config_example1(&mut self, max_range:f32, delay_sec:f32, trigger_treschold_00:f32){
 
 
-        if self.begin_config(){
+        if self.begin_config() && self.begin_config(){
 
-            if self.begin_config(){
+            if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::Range, max_range)){
 
-                if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::Range, max_range)){
+                if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::Delay, delay_sec)){
+                    if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00)){
 
-                    if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::Delay, delay_sec)){
-                        if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00)){
+                        if self.end_save_config(){
 
-                            if self.end_save_config(){
-
-                                self.send_cmd_and_check_ack_result(SerialCmd::set_report_mode());
-                            }
+                           self.send_cmd_and_check_ack_result(SerialCmd::set_report_mode());
+                           //self.send_cmd_and_check_ack_result(SerialCmd::set_report_ascii_mode());
                         }
-
                     }
 
                 }
@@ -137,26 +134,24 @@ impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_W
 
         self.delay_micro_seconds(data.wait_micro_seconds);
 
-        {//read data from rx
-            parser.clear();
+        parser.clear();
 
-            let mut idle_loops = 0u32;
+        let mut idle_loops = 0u32;
 
-            loop {
+        loop {
 
-                if let Some(b) = self.rx_read.read_byte() {
-                    if parser.feed(b) {
-                        return Some(decoder(&parser.payload));
-                    }
-                }else{
-
-                    idle_loops += 1;
-                    if idle_loops > 50_000 {
-                        break;
-                    }
+            if let Some(b) = self.rx_read.read_byte() {
+                if parser.feed(b) {
+                    return Some(decoder(&parser.payload));
                 }
+            }else{
 
+                idle_loops += 1;
+                if idle_loops > 50_000 {
+                    break;
+                }
             }
+
         }
 
         None
@@ -173,41 +168,40 @@ impl <DELAY:DelayMs, TX_WRITE:UsartTx,RX_READ:UsartRx> MicrowaveRadar<DELAY,TX_W
 
         self.delay_micro_seconds(data.wait_micro_seconds);
 
-        {//read data from rx
-            if !data.result_payload_ack.is_empty() {
 
-                let mut parser = super::Parser::<'a, R, 0, { super::CommandID::None.raw() }>::new(&super::SEND_HEADER, &super::SEND_TAIL);
+        if !data.result_payload_ack.is_empty() {
 
-                parser.clear();
+            let mut parser = super::Parser::<'a, R, 0, { super::CommandID::None.raw() }>::new(&super::SEND_HEADER, &super::SEND_TAIL);
 
-                let mut idle_loops = 0u32;
+            parser.clear();
 
-                loop {
+            let mut idle_loops = 0u32;
 
-                    if let Some(b) = self.rx_read.read_byte() {
-                        if parser.feed(b) {
-                            // return Some(decoder(&parser.payload));
+            loop {
 
-                            for i in 0..R{
-                                if data.result_payload_ack[i] != parser.payload[i] {
-                                    return false;
-                                }
+                if let Some(b) = self.rx_read.read_byte() {
+                    if parser.feed(b) {
+                        // return Some(decoder(&parser.payload));
+
+                        for i in 0..R{
+                            if data.result_payload_ack[i] != parser.payload[i] {
+                                return false;
                             }
-                            return true;
                         }
-                    }else{
+                        return true;
+                    }
+                }else{
 
-                        idle_loops += 1;
-                        if idle_loops > 50_000 {
-                            break;
-                        }
+                    idle_loops += 1;
+                    if idle_loops > 50_000 {
+                        break;
                     }
                 }
-
             }
-            return false;
+
         }
-        true
+        false
+
     }
 
 

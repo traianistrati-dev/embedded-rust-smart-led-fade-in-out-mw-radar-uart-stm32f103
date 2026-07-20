@@ -1,0 +1,27 @@
+[package]
+name        = "mw_radar"
+version     = "0.1.0"
+edition     = "2021"
+license     = "MIT"
+description = "HMMD mmWave Sensor USART protocol"
+# Fill these in before `cargo publish`:
+# repository  = "https://github.com/…"
+# readme      = "README.md"
+# keywords    = ["embedded", "no-std"]
+# categories  = ["embedded", "no-std"]
+
+[lib]
+# The bare-metal target has no `test` crate, so a test/bench/doctest
+# harness cannot be built for it — leaving these on gives
+# "can't find crate for `test`". Same reason the firmware's [[bin]]
+# sets them. Test this crate on the host instead:
+#   cargo test -p mw_radar --target <host-triple>
+test    = false
+bench   = false
+doctest = false
+
+[dependencies]
+# Depend on TRAITS, not on a concrete HAL, so this crate stays usable
+# on any chip (and is worth publishing):
+# embedded-hal = "1.0"
+libm = "0.2.16"

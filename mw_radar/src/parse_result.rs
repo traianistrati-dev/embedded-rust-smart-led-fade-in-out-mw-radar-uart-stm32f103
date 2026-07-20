@@ -25,8 +25,8 @@ const EXPECTED_CMD_ID: u16,
 > {
     state: State,
 
-    pub header: &'a [u8; 4],
-    pub tail: &'a [u8; 4],
+    pub header: &'a [u8],
+    pub tail: &'a [u8],
 
     pub length: u16,
     pub cmd_id: Option<u16>,
@@ -41,7 +41,7 @@ const EXPECTED_CMD_ID: u16,
 
 > Parser<'a, PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>
 {
-    pub const fn new(header: &'a[u8; 4], tail: &'a [u8; 4]) -> Self {
+    pub const fn new(header: &'a[u8], tail: &'a [u8]) -> Self {
         Self {
             state: State::Header(0),
             header,
@@ -89,8 +89,14 @@ const EXPECTED_CMD_ID: u16,
         match self.state {
             State::Header(n) => {
                 if b == self.header[n] {
-                    self.state = if n == 3 {
-                        State::Length(0, 0)
+                    self.state = if n == self.header.len() - 1 {
+
+                        if PAYLOAD_LEN == 0 {
+                            State::Payload(0)
+                        }else
+                        {
+                            State::Length(0, 0)
+                        }
                     } else {
                         State::Header(n + 1)
                     };
@@ -106,6 +112,7 @@ const EXPECTED_CMD_ID: u16,
 
             // LENGTH = little-endian
             State::Length(n, acc) => {
+
                 let acc = acc | ((b as u16) << (n * 8));
 
                 if n == 1 {
@@ -165,11 +172,23 @@ const EXPECTED_CMD_ID: u16,
 
             State::Payload(n) => {
                 self.payload[n] = b;
-                self.state = if n + 1 == PAYLOAD_LEN {
-                    State::Tail(0)
-                } else {
-                    State::Payload(n + 1)
+
+
+                self.state = if PAYLOAD_LEN == 0{
+                    if b == self.tail[0]{
+                        State::Tail(0)
+                    }else{
+                        State::Payload(n + 1)
+                    }
+                }
+                else {
+                    if n + 1 == PAYLOAD_LEN {
+                        State::Tail(0)
+                    } else {
+                        State::Payload(n + 1)
+                    }
                 };
+
                 false
             }
 
