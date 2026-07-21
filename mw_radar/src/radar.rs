@@ -77,8 +77,8 @@ impl <DELAY:DelayMs, TX:UsartTx,RX:UsartRx> MicrowaveRadar<DELAY,TX,RX>{
 
                         if self.end_save_config(){
 
-                           self.send_cmd_and_check_ack_result(SerialCmd::set_report_mode());
-                           //self.send_cmd_and_check_ack_result(SerialCmd::set_report_ascii_mode());
+                           //self.send_cmd_and_check_ack_result(SerialCmd::set_report_mode());
+                           self.send_cmd_and_check_ack_result(SerialCmd::set_report_ascii_mode());
                         }
                     }
 

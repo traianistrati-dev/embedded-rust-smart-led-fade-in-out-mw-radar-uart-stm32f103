@@ -150,11 +150,12 @@ let clocks = rcc.cfgr
 
     let mut buf_a:  [u8; 10]  = [0; 10];
     let mut lbuf:  [u8; 24] = [0; 24];
+    let mut i:usize = 0;
     //let mut buf_b:  [u8; 8]  = [0; 8];
 
-    let mut parser = mw_radar::report_normal_mode::HmmdFrame::new_parser();
-    //let mut parser_2 = mw_radar::report_mode::HmmdAsciiFrame::new_parser();
- 
+    //let mut parser = mw_radar::report_normal_mode::HmmdFrame::new_parser();
+    let mut parser_2 = mw_radar::report_mode::HmmdAsciiFrame::new_parser();
+
     loop {
 
 
@@ -165,24 +166,30 @@ let clocks = rcc.cfgr
         }
 
         radar.read_byte(|b| {
-				// pins::utils::i2c1::clear_display(&mut display);
 
-                // pins::utils::i2c1::wtrite_to_display(&mut display,
-                    // core::str::from_utf8(  &[b]).unwrap_or("?")
-                    // , 22);
+                lbuf[i] = b;
+                i+= 1;
+                if i > 20{
+                    i = 0;
+                }
+                pins::utils::i2c1::clear_display(&mut display);
 
-                // if parser_2.feed(b){
-                    // let frame = mw_radar::report_mode::HmmdAsciiFrame::decode(&parser_2.payload);
-                    // pins::utils::i2c1::wtrite_to_display(&mut display,
-                        // core::str::from_utf8(  &[frame.distance_cm[0],frame.distance_cm[1],frame.distance_cm[2],frame.distance_cm[3]]).unwrap_or("?")
-                        // , 0);
-                // }else{
-                   // pins::utils::i2c1::wtrite_to_display(&mut display,"OFF", 0);
-                // }
-                // display.flush().unwrap();
+                pins::utils::i2c1::wtrite_to_display(&mut display,
+                    core::str::from_utf8(  &lbuf).unwrap_or("?")
 
+                    , 22);
 
-                /**/
+                if parser_2.feed(b){
+                    let frame = mw_radar::report_mode::HmmdAsciiFrame::decode(&parser_2.payload);
+                    pins::utils::i2c1::wtrite_to_display(&mut display,
+                        core::str::from_utf8(  &[frame.distance_cm[0],frame.distance_cm[1],frame.distance_cm[2],frame.distance_cm[3]]).unwrap_or("?")
+                        , 0);
+                }else{
+                    pins::utils::i2c1::wtrite_to_display(&mut display,"OFF", 0);
+                }
+                display.flush().unwrap();
+
+                /*
                 if parser.feed(b) {
                     let frame = mw_radar::report_normal_mode::HmmdFrame::decode(&parser.payload);
                     // ── Render display ────────────────────────────────────────────
@@ -222,7 +229,7 @@ let clocks = rcc.cfgr
 
                     display.flush().unwrap();
                 }
-/**/
+*/
 
         });
 

@@ -1,8 +1,9 @@
 
 use super::{Parser,ParserResult};
 
-const CMD_HEADER: [u8; 10] = [0x4F, 0x4E, //ON
-    0x0D, 0x0A,//\n
+const CMD_HEADER: [u8; 6] = [
+    //0x4F, 0x4E, //ON
+    //0x0D, 0x0A,//\n
     0x52, 0x61, 0x6E, 0x67,0x65,//Range
     0x20 // SP
 ];
@@ -69,7 +70,7 @@ impl SerialCmd<18,0>{
                 SEND_TAIL[0], SEND_TAIL[1], SEND_TAIL[2], SEND_TAIL[3],
             ],
             result_payload_ack:[],
-            wait_micro_seconds: 50,
+            wait_micro_seconds: 5,
         }
     }
 
