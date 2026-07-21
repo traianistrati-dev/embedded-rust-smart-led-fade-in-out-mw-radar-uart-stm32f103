@@ -3,7 +3,6 @@
 
 pub mod data;
 pub mod send_models;
-pub mod report_mode;
 pub mod parse_result;
 pub mod parameter;
 pub mod radar;

@@ -91,12 +91,7 @@ const EXPECTED_CMD_ID: u16,
                 if b == self.header[n] {
                     self.state = if n == self.header.len() - 1 {
 
-                        if PAYLOAD_LEN == 0 {
-                            State::Payload(0)
-                        }else
-                        {
-                            State::Length(0, 0)
-                        }
+                        State::Length(0, 0)
                     } else {
                         State::Header(n + 1)
                     };
@@ -174,19 +169,10 @@ const EXPECTED_CMD_ID: u16,
                 self.payload[n] = b;
 
 
-                self.state = if PAYLOAD_LEN == 0{
-                    if b == self.tail[0]{
-                        State::Tail(0)
-                    }else{
-                        State::Payload(n + 1)
-                    }
-                }
-                else {
-                    if n + 1 == PAYLOAD_LEN {
-                        State::Tail(0)
-                    } else {
-                        State::Payload(n + 1)
-                    }
+                self.state =  if n + 1 == PAYLOAD_LEN {
+                    State::Tail(0)
+                } else {
+                    State::Payload(n + 1)
                 };
 
                 false

@@ -21,16 +21,16 @@ use stm32f1xx_hal::{
 
 #[entry]
 fn main() -> ! {
-let dp = pac::Peripherals::take().unwrap();
+    let dp = pac::Peripherals::take().unwrap();
 
-let mut flash = dp.FLASH.constrain();
-let rcc = dp.RCC.constrain();
-let mut afio = dp.AFIO.constrain();
-let clocks = rcc.cfgr
-                 .use_hse(8.MHz())
-                 .sysclk(72.MHz())
-                 .pclk1(36.MHz())
-                 .freeze(&mut flash.acr);
+    let mut flash = dp.FLASH.constrain();
+    let rcc = dp.RCC.constrain();
+    let mut afio = dp.AFIO.constrain();
+    let clocks = rcc.cfgr
+    .use_hse(8.MHz())
+    .sysclk(72.MHz())
+    .pclk1(36.MHz())
+    .freeze(&mut flash.acr);
 
     let mut gpioa = dp.GPIOA.split();
     let mut gpiob = dp.GPIOB.split();
@@ -52,7 +52,7 @@ let clocks = rcc.cfgr
     let (mut _tx1_mw_radar, mut _rx1_mw_radar) = pins::configs::usart1::init(dp.USART1, (pa9_usart1_tx, pa10_usart1_rx), &mut afio, &clocks);
     let _i2c1_128x32_display = pins::configs::i2c1::init(dp.I2C1, (pb8_i2c1_scl, pb9_i2c1_sda), &mut afio, &clocks);
 
-// <<< GENERATED END >>>
+    // <<< GENERATED END >>>
 
     pc13_out_board_led.set_high();
 
@@ -82,12 +82,9 @@ let clocks = rcc.cfgr
     };
 
     let mut radar = mw_radar::MicrowaveRadar::new(delay_micro_seconds_fn, usart1_tx_write_fn, usart1_rx_read_fn);
-
-
     //----------------------
     let mut parser_params = mw_radar::parameter::ReadParam::new_parser();
     //----------------------
-    //radar.begin_config();
     {
         let radar_range_gate_val: Option<u32> = radar.get_param_value( mw_radar::data::ParameterID::Range ,&mut parser_params);
 
@@ -137,24 +134,13 @@ let clocks = rcc.cfgr
 
     delay_micro_seconds_fn(3000000);
 
-    //radar.end_save_config();
 
-    // ── Loop principal ────────────────────────────────────────────────────────
-
-    let radar_range_gate:u32 = 15;//0-15 * 70cm
-    let radar_delay_sec:u32 = 2; // 1 - 999 999 99
-
-
-    radar.send_config_example1(radar_range_gate as f32 , radar_delay_sec as f32, 48.93);
-
+    radar.set_range_delay_with_default_threshold(1.0 , 3.0);
 
     let mut buf_a:  [u8; 10]  = [0; 10];
     let mut lbuf:  [u8; 24] = [0; 24];
-    let mut i:usize = 0;
-    //let mut buf_b:  [u8; 8]  = [0; 8];
 
-    //let mut parser = mw_radar::report_normal_mode::HmmdFrame::new_parser();
-    let mut parser_2 = mw_radar::report_mode::HmmdAsciiFrame::new_parser();
+    let mut parser = mw_radar::report_normal_mode::HmmdFrame::new_parser();
 
     loop {
 
@@ -167,29 +153,6 @@ let clocks = rcc.cfgr
 
         radar.read_byte(|b| {
 
-                lbuf[i] = b;
-                i+= 1;
-                if i > 20{
-                    i = 0;
-                }
-                pins::utils::i2c1::clear_display(&mut display);
-
-                pins::utils::i2c1::wtrite_to_display(&mut display,
-                    core::str::from_utf8(  &lbuf).unwrap_or("?")
-
-                    , 22);
-
-                if parser_2.feed(b){
-                    let frame = mw_radar::report_mode::HmmdAsciiFrame::decode(&parser_2.payload);
-                    pins::utils::i2c1::wtrite_to_display(&mut display,
-                        core::str::from_utf8(  &[frame.distance_cm[0],frame.distance_cm[1],frame.distance_cm[2],frame.distance_cm[3]]).unwrap_or("?")
-                        , 0);
-                }else{
-                    pins::utils::i2c1::wtrite_to_display(&mut display,"OFF", 0);
-                }
-                display.flush().unwrap();
-
-                /*
                 if parser.feed(b) {
                     let frame = mw_radar::report_normal_mode::HmmdFrame::decode(&parser.payload);
                     // ── Render display ────────────────────────────────────────────
@@ -229,7 +192,7 @@ let clocks = rcc.cfgr
 
                     display.flush().unwrap();
                 }
-*/
+                /**/
 
         });
 

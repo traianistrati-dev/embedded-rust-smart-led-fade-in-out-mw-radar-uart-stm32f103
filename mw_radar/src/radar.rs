@@ -50,22 +50,9 @@ impl <DELAY:DelayMs, TX:UsartTx,RX:UsartRx> MicrowaveRadar<DELAY,TX,RX>{
         Self { delay:delay_fn,tx_write,rx_read}
     }
 
-    pub fn read_byte(&mut self,mut read_fn:impl FnMut(u8)){
-        if let Some(b) = self.rx_read.read_byte() {
-            read_fn(b);
-        }
-    }
 
-
-
-
-
-    pub fn delay_micro_seconds(&self, ms:u32) {
-
-        self.delay.delay_ms(ms);
-    }
-
-    pub fn send_config_example1(&mut self, max_range:f32, delay_sec:f32, trigger_treschold_00:f32){
+    ///!!! All parameters must be set before end_save_config() prior to save configuration on sensor flash !!!
+    pub fn set_range_delay_with_default_threshold(&mut self, max_range:f32, delay_sec:f32){
 
 
         if self.begin_config() && self.begin_config(){
@@ -73,36 +60,98 @@ impl <DELAY:DelayMs, TX:UsartTx,RX:UsartRx> MicrowaveRadar<DELAY,TX,RX>{
             if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::Range, max_range)){
 
                 if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::Delay, delay_sec)){
-                    if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00)){
 
-                        if self.end_save_config(){
+                    if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold00, 48.93))
+                    && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold00, 47.38))
+                    {
+                        if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold01, 45.57))
+                        && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold01, 44.03))
+                        {
+                            if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold02, 43.20))
+                            && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold02, 41.66))
+                            {
+                                if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold03, 36.18))
+                                && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold03, 34.63))
+                                {
+                                    if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold04, 34.45))
+                                    && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold04, 32.90))
+                                    {
+                                        if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold05, 32.04))
+                                        && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold05, 30.49))
+                                        {
+                                            if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold06, 30.22))
+                                            && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold06, 28.67))
+                                            {
+                                                if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold07, 27.90))
+                                                && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold07, 26.35))
+                                                {
+                                                    if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold08, 25.86))
+                                                    && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold08, 24.31))
+                                                    {
+                                                        if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold09, 23.45))
+                                                        && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold09, 21.90))
+                                                        {
+                                                            if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold10, 21.90))
+                                                            && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold10, 20.35))
+                                                            {
+                                                                if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold11, 21.37))
+                                                                && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold11, 19.82))
+                                                                {
+                                                                    if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold12, 19.98))
+                                                                    && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold12, 18.44))
+                                                                    {
+                                                                        if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold13, 20.05))
+                                                                        && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold13, 18.50))
+                                                                        {
 
-                           //self.send_cmd_and_check_ack_result(SerialCmd::set_report_mode());
-                           self.send_cmd_and_check_ack_result(SerialCmd::set_report_ascii_mode());
+                                                                            if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold14, 18.98))
+                                                                            && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold14, 17.43))
+                                                                            {
+                                                                                if self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::TriggerThreshold15, 18.75))
+                                                                                && self.send_cmd_and_check_ack_result(SerialCmd::set_param_value(ParameterID::HoldThreshold15, 17.20))
+                                                                                {
+
+
+                                                                                    if self.end_save_config(){
+
+
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-
                 }
-
             }
-
         }
 
-
-
-        // self.begin_config();
-        // self.begin_config();
-
-        // self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Range, max_range));
-        // self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::Delay, delay_sec));
-        // self.send_cmd(SerialCmdWithACK::set_param_value(ParameterID::TriggerThreshold00, trigger_treschold_00));
-
-        // self.send_cmd(SerialCmdWithACK::set_report_mode());
-
-        // self.end_save_config();
+        self.send_cmd_and_check_ack_result(SerialCmd::set_report_mode());
 
     }
 
+
+    pub fn read_byte(&mut self,mut read_fn:impl FnMut(u8)){
+        if let Some(b) = self.rx_read.read_byte() {
+            read_fn(b);
+        }
+    }
+
+
+    pub fn delay_micro_seconds(&self, ms:u32) {
+
+        self.delay.delay_ms(ms);
+    }
 
 
     pub fn get_param_value<const PAYLOAD_LEN: usize, const RESERVED_LEN: usize, const EXPECTED_CMD_ID: u16>(
@@ -181,7 +230,6 @@ impl <DELAY:DelayMs, TX:UsartTx,RX:UsartRx> MicrowaveRadar<DELAY,TX,RX>{
 
                 if let Some(b) = self.rx_read.read_byte() {
                     if parser.feed(b) {
-                        // return Some(decoder(&parser.payload));
 
                         for i in 0..R{
                             if data.result_payload_ack[i] != parser.payload[i] {
