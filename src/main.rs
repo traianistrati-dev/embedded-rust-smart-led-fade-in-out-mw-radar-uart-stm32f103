@@ -8,7 +8,7 @@ mod pins;
 use cortex_m_rt::entry;
 use panic_halt as _;
 
-use mw_radar::parse_result::ParserResult;
+use hmmd_mmwave_sensor::parse_result::ParserResult;
 
 mod menu_navigator;
 
@@ -81,12 +81,12 @@ let clocks = rcc.cfgr
         _rx1_mw_radar.read().ok()
     };
 
-    let mut radar = mw_radar::MicrowaveRadar::new(delay_micro_seconds_fn, usart1_tx_write_fn, usart1_rx_read_fn);
+    let mut radar = hmmd_mmwave_sensor::MicrowaveRadar::new(delay_micro_seconds_fn, usart1_tx_write_fn, usart1_rx_read_fn);
     //----------------------
-    let mut parser_params = mw_radar::parameter::ReadParam::new_parser();
+    let mut parser_params = hmmd_mmwave_sensor::parameter::ReadParam::new_parser();
     //----------------------
     {
-        let radar_range_gate_val: Option<u32> = radar.get_param_value( mw_radar::data::ParameterID::Range ,&mut parser_params);
+        let radar_range_gate_val: Option<u32> = radar.get_param_value( hmmd_mmwave_sensor::data::ParameterID::Range ,&mut parser_params);
 
 
         let mut out = [0u8; 32];
@@ -97,7 +97,7 @@ let clocks = rcc.cfgr
     }
     //----------------------
     {
-        let radar_delay_gate_val:Option<u32> = radar.get_param_value(mw_radar::data::ParameterID::Delay,&mut parser_params);
+        let radar_delay_gate_val:Option<u32> = radar.get_param_value(hmmd_mmwave_sensor::data::ParameterID::Delay,&mut parser_params);
 
         let mut out = [0u8; 32];
 
@@ -109,12 +109,12 @@ let clocks = rcc.cfgr
     //----------------------
     {
         let radar_tt_00_val:Option<u32> = radar.get_param_value(
-            mw_radar::data::ParameterID::TriggerThreshold00
+            hmmd_mmwave_sensor::data::ParameterID::TriggerThreshold00
             ,&mut parser_params
         );
 
         let radar_ht_00_val:Option<u32> = radar.get_param_value(
-            mw_radar::data::ParameterID::HoldThreshold00
+            hmmd_mmwave_sensor::data::ParameterID::HoldThreshold00
             ,&mut parser_params
         );
 
@@ -123,8 +123,8 @@ let clocks = rcc.cfgr
 
         pins::utils::i2c1::wtrite_to_display(&mut display
             ,pins::utils::i2c1::format_text_with_u32_2inline(
-                "00 tt=",mw_radar::parse_result::decode_threschold_value(radar_tt_00_val.unwrap_or_default())
-                ," ht=",mw_radar::parse_result::decode_threschold_value(radar_ht_00_val.unwrap_or_default())
+                "00 tt=",hmmd_mmwave_sensor::parse_result::decode_threschold_value(radar_tt_00_val.unwrap_or_default())
+                ," ht=",hmmd_mmwave_sensor::parse_result::decode_threschold_value(radar_ht_00_val.unwrap_or_default())
                 , &mut out)
             ,22);
     }
@@ -141,7 +141,7 @@ let clocks = rcc.cfgr
     let mut buf_a:  [u8; 10]  = [0; 10];
     let mut lbuf:  [u8; 24] = [0; 24];
 
-    let mut parser = mw_radar::report_normal_mode::HmmdFrame::new_parser();
+    let mut parser = hmmd_mmwave_sensor::report_normal_mode::HmmdFrame::new_parser();
 
     loop {
 
@@ -155,7 +155,7 @@ let clocks = rcc.cfgr
         radar.read_byte(|b| {
 
                 if parser.feed(b) {
-                    let frame = mw_radar::report_normal_mode::HmmdFrame::decode(&parser.payload);
+                    let frame = hmmd_mmwave_sensor::report_normal_mode::HmmdFrame::decode(&parser.payload);
                     // ── Render display ────────────────────────────────────────────
                     pins::utils::i2c1::clear_display(&mut display);
 

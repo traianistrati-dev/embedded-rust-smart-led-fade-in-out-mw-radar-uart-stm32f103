@@ -41,9 +41,7 @@ panic     = "abort"
 opt-level = 1
 
 [workspace]
-members = ["mw_radar"]
+members = ["hmmd_mmwave_sensor"]
 
-
-[dependencies.mw_radar]
-path = "mw_radar"
-
+[dependencies.hmmd_mmwave_sensor]
+path = "hmmd_mmwave_sensor"
