@@ -5,7 +5,7 @@ const CMD_HEADER: [u8; 4] = SEND_HEADER;//[0xFD, 0xFC, 0xFB, 0xFA];
 const CMD_TAIL:   [u8; 4] = SEND_TAIL;//[0x04, 0x03, 0x02, 0x01];
 
 const PAYLOAD_LEN: usize = 4;
-const EXPECTED_CMD_ID: u16  = super::CommandID::ReadParamAck.raw();
+const EXPECTED_CMD_ID: u16  = super::CommandID::ReadParamAck.as_u16();
 const RESERVED_LEN: usize = 2;
 
 type ParserType<'a> = Parser<'a, PAYLOAD_LEN, RESERVED_LEN,EXPECTED_CMD_ID>;
@@ -37,7 +37,7 @@ use super::{SerialCmd, ParameterID, CommandID, SEND_HEADER,SEND_TAIL};
 
 ///Reading parameter value requires this parser instance
 /*
-   //Code example 
+Code example 
 
 	let delay_micro_seconds_fn = |ms:u32|{
         cortex_m::asm::delay(ms.saturating_mul(&clocks.sysclk().to_Hz() / 1_000_000)); //some example

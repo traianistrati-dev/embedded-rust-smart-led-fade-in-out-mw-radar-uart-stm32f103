@@ -55,7 +55,7 @@ const EXPECTED_CMD_ID: u16,
 
     #[inline]
     const fn has_cmd_id() -> bool {
-        EXPECTED_CMD_ID != super::CommandID::None.raw()
+        EXPECTED_CMD_ID != super::CommandID::None.as_u16()
     }
     pub fn clear(&mut self) {
         self.reset();

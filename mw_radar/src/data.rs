@@ -55,7 +55,7 @@ impl ParameterID{
 
 }
 
-#[repr(u16)]
+//#[repr(u16)]
 pub enum CommandID{
     EnableConfig = 0xFF00,
     EnableConfigAck = 0xFF01,
@@ -76,7 +76,7 @@ impl CommandID{
         (self as u16).to_be_bytes()
     }
 
-    pub const fn raw(self) -> u16 {
+    pub const fn as_u16(self) -> u16 {
         self as u16
     }
 

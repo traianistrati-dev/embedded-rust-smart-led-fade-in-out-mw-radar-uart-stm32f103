@@ -7,7 +7,7 @@ const CMD_TAIL:   [u8; 4] = [0xF8, 0xF7, 0xF6, 0xF5];
 /// Payload = 1 (status) + 2 (distance cm) + 32 (16 gates energy)
 const PAYLOAD_LEN: usize = 35;
 
-const EXPECTED_CMD_ID: u16  = super::CommandID::None.raw();
+const EXPECTED_CMD_ID: u16  = super::CommandID::None.as_u16();
 const RESERVED_LEN: usize = 0;
 
 type ParserType<'a> = Parser<'a, PAYLOAD_LEN,  RESERVED_LEN, EXPECTED_CMD_ID>;

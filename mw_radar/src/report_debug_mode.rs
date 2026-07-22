@@ -8,7 +8,7 @@ const PAYLOAD_LEN: usize = 1280;
 
 const COMMAND_ID: CommandID  = CommandID::ReportMode;
 
-const EXPECTED_CMD_ID: u16  = COMMAND_ID.raw();
+const EXPECTED_CMD_ID: u16  = COMMAND_ID.as_u16();
 const RESERVED_LEN: usize = 0;
 
 type ParserType<'a> = Parser<'a, PAYLOAD_LEN, RESERVED_LEN, EXPECTED_CMD_ID>;

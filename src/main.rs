@@ -21,16 +21,16 @@ use stm32f1xx_hal::{
 
 #[entry]
 fn main() -> ! {
-    let dp = pac::Peripherals::take().unwrap();
+let dp = pac::Peripherals::take().unwrap();
 
-    let mut flash = dp.FLASH.constrain();
-    let rcc = dp.RCC.constrain();
-    let mut afio = dp.AFIO.constrain();
-    let clocks = rcc.cfgr
-    .use_hse(8.MHz())
-    .sysclk(72.MHz())
-    .pclk1(36.MHz())
-    .freeze(&mut flash.acr);
+let mut flash = dp.FLASH.constrain();
+let rcc = dp.RCC.constrain();
+let mut afio = dp.AFIO.constrain();
+let clocks = rcc.cfgr
+                 .use_hse(8.MHz())
+                 .sysclk(72.MHz())
+                 .pclk1(36.MHz())
+                 .freeze(&mut flash.acr);
 
     let mut gpioa = dp.GPIOA.split();
     let mut gpiob = dp.GPIOB.split();
@@ -52,7 +52,7 @@ fn main() -> ! {
     let (mut _tx1_mw_radar, mut _rx1_mw_radar) = pins::configs::usart1::init(dp.USART1, (pa9_usart1_tx, pa10_usart1_rx), &mut afio, &clocks);
     let _i2c1_128x32_display = pins::configs::i2c1::init(dp.I2C1, (pb8_i2c1_scl, pb9_i2c1_sda), &mut afio, &clocks);
 
-    // <<< GENERATED END >>>
+// <<< GENERATED END >>>
 
     pc13_out_board_led.set_high();
 
@@ -128,6 +128,7 @@ fn main() -> ! {
                 , &mut out)
             ,22);
     }
+
 
     display.flush().unwrap();
 
