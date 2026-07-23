@@ -136,7 +136,7 @@ let clocks = rcc.cfgr
     delay_micro_seconds_fn(3000000);
 
 
-    radar.set_range_delay_with_default_threshold(1.0 , 3.0);
+    radar.set_range_delay_with_default_threshold(2 , 3);
 
     let mut buf_a:  [u8; 10]  = [0; 10];
     let mut lbuf:  [u8; 24] = [0; 24];
