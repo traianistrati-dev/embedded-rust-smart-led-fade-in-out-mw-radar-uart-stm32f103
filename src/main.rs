@@ -86,23 +86,23 @@ let clocks = rcc.cfgr
     let mut parser_params = hmmd_mmwave_sensor::parameter::ReadParam::new_parser();
     //----------------------
     {
-        let radar_range_gate_val: Option<u32> = radar.get_param_value( hmmd_mmwave_sensor::data::ParameterID::Range ,&mut parser_params);
+        let radar_range_gate_val: Option<u32> = radar.get_param_value( hmmd_mmwave_sensor::data::ParameterID::RangeGate ,&mut parser_params);
 
 
         let mut out = [0u8; 32];
 
         pins::utils::i2c1::wtrite_to_display(&mut display
-            ,pins::utils::i2c1::format_text_with_u32("Range: ",radar_range_gate_val.unwrap_or_default(), "", &mut out)
+            ,pins::utils::i2c1::format_text_with_u32("RangeGate: ",radar_range_gate_val.unwrap_or_default(), "", &mut out)
             ,0);
     }
     //----------------------
     {
-        let radar_delay_gate_val:Option<u32> = radar.get_param_value(hmmd_mmwave_sensor::data::ParameterID::Delay,&mut parser_params);
+        let radar_delay_gate_val:Option<u32> = radar.get_param_value(hmmd_mmwave_sensor::data::ParameterID::AbsenseReportDelay,&mut parser_params);
 
         let mut out = [0u8; 32];
 
         pins::utils::i2c1::wtrite_to_display(&mut display
-            ,pins::utils::i2c1::format_text_with_u32("Delay: ",radar_delay_gate_val.unwrap_or_default(), " sec", &mut out)
+            ,pins::utils::i2c1::format_text_with_u32("AbsenseDelay: ",radar_delay_gate_val.unwrap_or_default(), " sec", &mut out)
             ,11);
     }
 
@@ -136,7 +136,7 @@ let clocks = rcc.cfgr
     delay_micro_seconds_fn(3000000);
 
 
-    radar.set_range_delay_with_default_threshold(2 , 3);
+    radar.set_range_delay_with_default_threshold(1 , 3);
 
     let mut buf_a:  [u8; 10]  = [0; 10];
     let mut lbuf:  [u8; 24] = [0; 24];
@@ -159,7 +159,7 @@ let clocks = rcc.cfgr
                     // ── Render display ────────────────────────────────────────────
                     pins::utils::i2c1::clear_display(&mut display);
 
-                    {//read Range and Delay
+                    {//read RangeGate and AbsenseReportDelay
                         let mut pos = 0usize;
 
                         pins::utils::i2c1::wtrite_to_display(&mut display,
